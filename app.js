@@ -31,6 +31,12 @@
 
     copyResultsBtn: document.getElementById("copyResultsBtn"),
     newDrawBtn: document.getElementById("newDrawBtn"),
+    closeResultsBtn: document.getElementById("closeResultsBtn"),
+
+    excludeToggle: document.getElementById("excludeToggle"),
+    excludeInfo: document.getElementById("excludeInfo"),
+    excludedCount: document.getElementById("excludedCount"),
+    confettiLayer: document.getElementById("confettiLayer"),
 
     toast: document.getElementById("toast")
   };
@@ -43,7 +49,8 @@
     hash: "—",
     winners: [],
     drawing: false,
-    hashRevision: 0
+    hashRevision: 0,
+    excludedIds: new Set()
   };
 
   function parseIds(text) {
@@ -97,16 +104,30 @@
     return Number.isFinite(value) ? value : DEFAULT_WINNERS;
   }
 
+  function getPool() {
+    if (!el.excludeToggle.checked || state.excludedIds.size === 0) {
+      return state.ids;
+    }
+    return state.ids.filter(id => !state.excludedIds.has(id));
+  }
+
   function setWinnerCount(value) {
-    const max = Math.max(1, state.ids.length || MAX_IDS);
+    const max = Math.max(1, getPool().length || MAX_IDS);
     const normalized = Math.max(1, Math.min(max, Number(value) || 1));
 
     el.winnerCount.value = String(normalized);
     validate();
   }
 
+  function updateExcludeInfo() {
+    const active = el.excludeToggle.checked && state.excludedIds.size > 0;
+    el.excludeInfo.classList.toggle("hidden", !active);
+    el.excludedCount.textContent = String(state.excludedIds.size);
+  }
+
   function validate() {
     const winners = getWinnerCount();
+    const pool = getPool();
 
     let message = "";
     let className = "validation";
@@ -116,14 +137,19 @@
     } else if (state.overLimit) {
       message = `Лимит — ${MAX_IDS} уникальных ID`;
       className += " error";
+    } else if (pool.length === 0) {
+      message = "Все участники уже выигрывали";
+      className += " error";
     } else if (winners < 1) {
       message = "Нужно выбрать хотя бы 1 ID";
       className += " error";
-    } else if (winners > state.ids.length) {
-      message = `Загружено только ${state.ids.length} ID`;
+    } else if (winners > pool.length) {
+      message = el.excludeToggle.checked && state.excludedIds.size > 0
+        ? `Доступно ${pool.length} ID (без учёта победителей)`
+        : `Загружено только ${pool.length} ID`;
       className += " error";
     } else {
-      message = `${state.ids.length} участников → ${winners} победителей`;
+      message = `${pool.length} участников → ${winners} победителей`;
       className += " ok";
     }
 
@@ -132,9 +158,11 @@
 
     el.startBtn.disabled =
       state.drawing ||
-      state.ids.length === 0 ||
+      pool.length === 0 ||
       winners < 1 ||
-      winners > state.ids.length;
+      winners > pool.length;
+
+    updateExcludeInfo();
   }
 
   async function updateIds() {
@@ -145,6 +173,7 @@
     state.rawCount = parsed.rawCount;
     state.duplicates = parsed.duplicates;
     state.overLimit = parsed.overLimit;
+    state.excludedIds = new Set();
 
     el.idCount.textContent = String(state.ids.length);
 
@@ -271,7 +300,7 @@
     state.drawing = true;
     validate();
 
-    const drawIds = [...state.ids];
+    const drawIds = getPool();
     const drawHash = state.hash;
 
     el.resultsSection.classList.add("hidden");
@@ -284,6 +313,10 @@
 
       const winners = pickWithoutReplacement(drawIds, winnerCount);
       state.winners = winners;
+
+      if (el.excludeToggle.checked) {
+        winners.forEach(id => state.excludedIds.add(id));
+      }
 
       el.drawStage.classList.add("hit");
 
@@ -306,7 +339,7 @@
       await delay(450);
 
       el.resultsSection.classList.remove("hidden");
-      el.resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      spawnConfetti();
     } catch (error) {
       console.error(error);
       showToast("Ошибка: браузер не поддерживает безопасный генератор");
@@ -355,12 +388,50 @@
     }, 1900);
   }
 
+  const CONFETTI_COLORS = ["#f0b93a", "#ffe29a", "#ff2b12", "#2fe6b8"];
+
+  function spawnConfetti() {
+    el.confettiLayer.replaceChildren();
+
+    const count = 60;
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement("span");
+      piece.className = "confetti-piece";
+
+      const left = Math.random() * 100;
+      const drift = (Math.random() - 0.5) * 220;
+      const duration = 2.6 + Math.random() * 1.8;
+      const delay = Math.random() * 0.5;
+      const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      const rounded = Math.random() > 0.5;
+
+      piece.style.left = `${left}%`;
+      piece.style.background = color;
+      piece.style.setProperty("--drift", `${drift}px`);
+      piece.style.animationDuration = `${duration}s`;
+      piece.style.animationDelay = `${delay}s`;
+      if (rounded) piece.style.borderRadius = "50%";
+
+      fragment.appendChild(piece);
+    }
+
+    el.confettiLayer.appendChild(fragment);
+
+    clearTimeout(spawnConfetti._timer);
+    spawnConfetti._timer = setTimeout(() => {
+      el.confettiLayer.replaceChildren();
+    }, 4600);
+  }
+
   function resetDrawView() {
     state.winners = [];
 
     el.drawStage.classList.add("hidden");
     el.drawStage.classList.remove("hit");
     el.resultsSection.classList.add("hidden");
+    el.confettiLayer.replaceChildren();
 
     el.rouletteNumber.textContent = "--------";
     el.rouletteProgress.textContent = "Подготовка…";
@@ -401,6 +472,24 @@
   });
 
   el.newDrawBtn.addEventListener("click", resetDrawView);
+  el.closeResultsBtn.addEventListener("click", resetDrawView);
+
+  el.excludeToggle.addEventListener("change", () => {
+    setWinnerCount(getWinnerCount());
+    validate();
+  });
+
+  el.resultsSection.addEventListener("click", (event) => {
+    if (event.target === el.resultsSection) {
+      resetDrawView();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !el.resultsSection.classList.contains("hidden")) {
+      resetDrawView();
+    }
+  });
 
   updateIds();
 })();

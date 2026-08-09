@@ -62,6 +62,15 @@
           <button type="button" id="plusBtn" aria-label="Больше">+</button>
         </div>
 
+        <label class="exclude-toggle">
+          <input type="checkbox" id="excludeToggle">
+          <span class="checkmark"></span>
+          <span class="exclude-text">
+            Не повторять победителей
+            <small id="excludeInfo" class="hidden">разыграно: <strong id="excludedCount">0</strong></small>
+          </span>
+        </label>
+
         <div id="validationMessage" class="validation" aria-live="polite">
           Добавьте участников, чтобы начать
         </div>
@@ -84,25 +93,31 @@
 
     <!-- RESULTS -->
     <section id="resultsSection" class="results hidden">
-      <div class="results-head">
-        <h2>Победители</h2>
-        <button id="copyResultsBtn" type="button" class="text-btn text-btn-fill">Копировать список</button>
+      <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+
+      <div class="results-panel">
+        <button id="closeResultsBtn" type="button" class="results-close" aria-label="Закрыть">×</button>
+
+        <div class="results-head">
+          <h2>Победители</h2>
+          <button id="copyResultsBtn" type="button" class="text-btn text-btn-fill">Копировать список</button>
+        </div>
+
+        <div id="resultsGrid" class="results-grid"></div>
+
+        <div class="audit">
+          <span id="drawTime">—</span>
+          <span class="dot">·</span>
+          <span id="drawParticipants">—</span> участников
+          <span class="dot">·</span>
+          хэш <code id="drawHash">—</code>
+        </div>
+
+        <button id="newDrawBtn" type="button" class="text-btn">Новый розыгрыш</button>
+        <!-- kept for scripting compatibility, not shown -->
+        <span id="drawSummary" class="visually-hidden"></span>
+        <span id="drawWinners" class="visually-hidden"></span>
       </div>
-
-      <div id="resultsGrid" class="results-grid"></div>
-
-      <div class="audit">
-        <span id="drawTime">—</span>
-        <span class="dot">·</span>
-        <span id="drawParticipants">—</span> участников
-        <span class="dot">·</span>
-        хэш <code id="drawHash">—</code>
-      </div>
-
-      <button id="newDrawBtn" type="button" class="text-btn">Новый розыгрыш</button>
-      <!-- kept for scripting compatibility, not shown -->
-      <span id="drawSummary" class="visually-hidden"></span>
-      <span id="drawWinners" class="visually-hidden"></span>
     </section>
 
     <footer class="foot">
