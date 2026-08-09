@@ -16,6 +16,9 @@
     minusBtn: document.getElementById("minusBtn"),
     plusBtn: document.getElementById("plusBtn"),
 
+    excludeInfo: document.getElementById("excludeInfo"),
+    excludedCount: document.getElementById("excludedCount"),
+
     validation: document.getElementById("validationMessage"),
     startBtn: document.getElementById("startBtn"),
 
@@ -33,17 +36,15 @@
     newDrawBtn: document.getElementById("newDrawBtn"),
     closeResultsBtn: document.getElementById("closeResultsBtn"),
 
-    excludeToggle: document.getElementById("excludeToggle"),
-    excludeInfo: document.getElementById("excludeInfo"),
-    excludedCount: document.getElementById("excludedCount"),
     confettiLayer: document.getElementById("confettiLayer"),
 
     toast: document.getElementById("toast")
   };
 
+  // Winners are ALWAYS removed from the pool automatically.
+  // The exclusion list only resets when the participant list itself changes.
   let state = {
     ids: [],
-    rawCount: 0,
     duplicates: 0,
     overLimit: false,
     hash: "—",
@@ -71,7 +72,6 @@
 
     return {
       ids: unique.slice(0, MAX_IDS),
-      rawCount: tokens.length,
       duplicates: Math.max(0, tokens.length - unique.length),
       overLimit: unique.length > MAX_IDS
     };
@@ -104,8 +104,9 @@
     return Number.isFinite(value) ? value : DEFAULT_WINNERS;
   }
 
+  // Pool = all loaded IDs minus everyone who has already won (auto).
   function getPool() {
-    if (!el.excludeToggle.checked || state.excludedIds.size === 0) {
+    if (state.excludedIds.size === 0) {
       return state.ids;
     }
     return state.ids.filter(id => !state.excludedIds.has(id));
@@ -120,7 +121,7 @@
   }
 
   function updateExcludeInfo() {
-    const active = el.excludeToggle.checked && state.excludedIds.size > 0;
+    const active = state.excludedIds.size > 0;
     el.excludeInfo.classList.toggle("hidden", !active);
     el.excludedCount.textContent = String(state.excludedIds.size);
   }
@@ -133,23 +134,21 @@
     let className = "validation";
 
     if (state.ids.length === 0) {
-      message = "Добавьте участников, чтобы начать";
+      message = "Boshlash uchun ishtirokchilarni qo'shing";
     } else if (state.overLimit) {
-      message = `Лимит — ${MAX_IDS} уникальных ID`;
+      message = `Limit — ${MAX_IDS} ta noyob ID`;
       className += " error";
     } else if (pool.length === 0) {
-      message = "Все участники уже выигрывали";
-      className += " error";
+      // Everyone already won — stay quiet, no scary error, just wait for a new list.
+      message = "Yangi ro'yxat qo'shilishini kutmoqda";
     } else if (winners < 1) {
-      message = "Нужно выбрать хотя бы 1 ID";
+      message = "Kamida 1 ta ID tanlanishi kerak";
       className += " error";
     } else if (winners > pool.length) {
-      message = el.excludeToggle.checked && state.excludedIds.size > 0
-        ? `Доступно ${pool.length} ID (без учёта победителей)`
-        : `Загружено только ${pool.length} ID`;
+      message = `Mavjud: ${pool.length} ta ID`;
       className += " error";
     } else {
-      message = `${pool.length} участников → ${winners} победителей`;
+      message = `${pool.length} ishtirokchi → ${winners} g'olib`;
       className += " ok";
     }
 
@@ -170,10 +169,9 @@
     const parsed = parseIds(el.idsInput.value);
 
     state.ids = parsed.ids;
-    state.rawCount = parsed.rawCount;
     state.duplicates = parsed.duplicates;
     state.overLimit = parsed.overLimit;
-    state.excludedIds = new Set();
+    state.excludedIds = new Set(); // new list -> nobody has won yet
 
     el.idCount.textContent = String(state.ids.length);
 
@@ -260,7 +258,7 @@
       await delay(wait);
     }
 
-    el.rouletteProgress.textContent = "Фиксируем результат…";
+    el.rouletteProgress.textContent = "Natija aniqlanmoqda…";
 
     await delay(320);
   }
@@ -271,7 +269,7 @@
     winners.forEach((id, index) => {
       const card = document.createElement("article");
       card.className = "result-card";
-      card.style.animationDelay = `${Math.min(index, 20) * 35}ms`;
+      card.style.animationDelay = `${Math.min(index, 20) * 55}ms`;
 
       const label = document.createElement("span");
       label.textContent = String(index + 1).padStart(2, "0");
@@ -314,35 +312,34 @@
       const winners = pickWithoutReplacement(drawIds, winnerCount);
       state.winners = winners;
 
-      if (el.excludeToggle.checked) {
-        winners.forEach(id => state.excludedIds.add(id));
-      }
+      // Every winner is permanently removed from the pool from now on.
+      winners.forEach(id => state.excludedIds.add(id));
 
       el.drawStage.classList.add("hit");
 
       if (winners.length === 1) {
         el.rouletteNumber.textContent = winners[0];
       } else {
-        el.rouletteNumber.textContent = "DONE";
+        el.rouletteNumber.textContent = "TAYYOR";
       }
 
-      el.rouletteProgress.textContent = "Готово";
+      el.rouletteProgress.textContent = "Tayyor";
 
       renderResults(winners);
 
       const finishedAt = new Date();
 
-      el.drawTime.textContent = finishedAt.toLocaleString("ru-RU");
+      el.drawTime.textContent = finishedAt.toLocaleString("uz-UZ");
       el.drawParticipants.textContent = String(drawIds.length);
       el.drawHash.textContent = shortHash(drawHash);
 
-      await delay(450);
+      await delay(400);
 
       el.resultsSection.classList.remove("hidden");
       spawnConfetti();
     } catch (error) {
       console.error(error);
-      showToast("Ошибка: браузер не поддерживает безопасный генератор");
+      showToast("Xatolik: brauzer xavfsiz generatorni qo'llab-quvvatlamaydi");
     } finally {
       state.drawing = false;
       validate();
@@ -393,7 +390,7 @@
   function spawnConfetti() {
     el.confettiLayer.replaceChildren();
 
-    const count = 60;
+    const count = 90;
     const fragment = document.createDocumentFragment();
 
     for (let i = 0; i < count; i++) {
@@ -401,13 +398,16 @@
       piece.className = "confetti-piece";
 
       const left = Math.random() * 100;
-      const drift = (Math.random() - 0.5) * 220;
-      const duration = 2.6 + Math.random() * 1.8;
-      const delay = Math.random() * 0.5;
+      const drift = (Math.random() - 0.5) * 260;
+      const duration = 2.6 + Math.random() * 2.0;
+      const delay = Math.random() * 0.6;
       const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
       const rounded = Math.random() > 0.5;
+      const size = 8 + Math.round(Math.random() * 6);
 
       piece.style.left = `${left}%`;
+      piece.style.width = `${size}px`;
+      piece.style.height = `${Math.round(size * 1.6)}px`;
       piece.style.background = color;
       piece.style.setProperty("--drift", `${drift}px`);
       piece.style.animationDuration = `${duration}s`;
@@ -422,7 +422,7 @@
     clearTimeout(spawnConfetti._timer);
     spawnConfetti._timer = setTimeout(() => {
       el.confettiLayer.replaceChildren();
-    }, 4600);
+    }, 5200);
   }
 
   function resetDrawView() {
@@ -434,7 +434,9 @@
     el.confettiLayer.replaceChildren();
 
     el.rouletteNumber.textContent = "--------";
-    el.rouletteProgress.textContent = "Подготовка…";
+    el.rouletteProgress.textContent = "Tayyorlanmoqda…";
+
+    validate();
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -464,20 +466,15 @@
   el.startBtn.addEventListener("click", startDraw);
 
   el.copyHashBtn.addEventListener("click", () => {
-    copyText(state.hash, "SHA-256 скопирован");
+    copyText(state.hash, "SHA-256 nusxalandi");
   });
 
   el.copyResultsBtn.addEventListener("click", () => {
-    copyText(state.winners.join("\n"), "Список скопирован");
+    copyText(state.winners.join("\n"), "Ro'yxat nusxalandi");
   });
 
   el.newDrawBtn.addEventListener("click", resetDrawView);
   el.closeResultsBtn.addEventListener("click", resetDrawView);
-
-  el.excludeToggle.addEventListener("change", () => {
-    setWinnerCount(getWinnerCount());
-    validate();
-  });
 
   el.resultsSection.addEventListener("click", (event) => {
     if (event.target === el.resultsSection) {
