@@ -1,31 +1,28 @@
-# PINCO Random Draw — Red & Gold
+# PINCO — Random Draw
 
-Static open-source random ID draw for GitHub Pages.
+Статический сайт для честного розыгрыша ID участников. Работает полностью в браузере, без сервера и без отправки данных.
 
-## Features
+## Возможности
 
-- Up to 1000 unique participant IDs
-- IDs are treated as text, so leading zeroes are preserved
-- Winner count selector
-- Secure browser randomness via `crypto.getRandomValues()`
-- Rejection sampling to avoid modulo bias
-- Draw without replacement
-- SHA-256 participant list hash
-- Results copied one ID per line for Google Sheets
-- No server and no participant data upload
+- До 1000 уникальных ID (текст, ведущие нули сохраняются)
+- Выбор количества победителей (стрелки + поле ввода)
+- Случайный выбор через `crypto.getRandomValues()` (без смещения — rejection sampling)
+- Выбор без повторов
+- SHA-256 хэш списка участников — доказывает, что список не подменили после розыгрыша
+- Копирование результатов и хэша в буфер обмена
+- Ничего не отправляется на сервер — весь код выполняется локально
 
-## Upload to GitHub
-
-Replace the old project files with:
+## Файлы
 
 - `index.html`
 - `styles.css`
 - `app.js`
 - `pinco-logo.png`
-- `README.md`
 
-If GitHub Pages is already enabled, the public website will update after the new commit is deployed.
+## Как обновить на GitHub Pages
 
-## Important
-
-The logo is stored locally as `pinco-logo.png`, so the site does not depend on an external image URL.
+1. Открой репозиторий на GitHub.
+2. `Add file → Upload files`.
+3. Перетащи все 4 файла — GitHub сам предложит заменить существующие.
+4. `Commit changes` → подожди пару минут, пока Pages пересоберёт сайт.
+5. Жёсткое обновление кэша в браузере: `Cmd/Ctrl + Shift + R`.

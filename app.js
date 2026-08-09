@@ -7,8 +7,6 @@
   const el = {
     idsInput: document.getElementById("idsInput"),
     idCount: document.getElementById("idCount"),
-    uniqueFeatureCount: document.getElementById("uniqueFeatureCount"),
-    duplicateInfo: document.getElementById("duplicateInfo"),
 
     listHash: document.getElementById("listHash"),
     copyHashBtn: document.getElementById("copyHashBtn"),
@@ -27,10 +25,8 @@
 
     resultsSection: document.getElementById("resultsSection"),
     resultsGrid: document.getElementById("resultsGrid"),
-    drawSummary: document.getElementById("drawSummary"),
     drawTime: document.getElementById("drawTime"),
     drawParticipants: document.getElementById("drawParticipants"),
-    drawWinners: document.getElementById("drawWinners"),
     drawHash: document.getElementById("drawHash"),
 
     copyResultsBtn: document.getElementById("copyResultsBtn"),
@@ -91,6 +87,11 @@
       .join("");
   }
 
+  function shortHash(hash) {
+    if (!hash || hash === "—" || hash.length < 16) return hash;
+    return `${hash.slice(0, 8)}…${hash.slice(-8)}`;
+  }
+
   function getWinnerCount() {
     const value = Number.parseInt(el.winnerCount.value, 10);
     return Number.isFinite(value) ? value : DEFAULT_WINNERS;
@@ -111,18 +112,18 @@
     let className = "validation";
 
     if (state.ids.length === 0) {
-      message = "Добавьте ID участников, чтобы начать.";
+      message = "Добавьте участников, чтобы начать";
     } else if (state.overLimit) {
-      message = `Лимит — ${MAX_IDS} уникальных ID. Лишние значения не участвуют.`;
+      message = `Лимит — ${MAX_IDS} уникальных ID`;
       className += " error";
     } else if (winners < 1) {
-      message = "Нужно выбрать хотя бы 1 ID.";
+      message = "Нужно выбрать хотя бы 1 ID";
       className += " error";
     } else if (winners > state.ids.length) {
-      message = `Нельзя выбрать ${winners}: загружено только ${state.ids.length} уникальных ID.`;
+      message = `Загружено только ${state.ids.length} ID`;
       className += " error";
     } else {
-      message = `Готово: ${state.ids.length} участников → ${winners} победителей.`;
+      message = `${state.ids.length} участников → ${winners} победителей`;
       className += " ok";
     }
 
@@ -146,8 +147,6 @@
     state.overLimit = parsed.overLimit;
 
     el.idCount.textContent = String(state.ids.length);
-    el.uniqueFeatureCount.textContent = String(state.ids.length);
-    el.duplicateInfo.textContent = `Дубликатов: ${state.duplicates}`;
 
     if (!state.ids.length) {
       state.hash = "—";
@@ -156,7 +155,7 @@
       return;
     }
 
-    el.listHash.textContent = "Вычисляется…";
+    el.listHash.textContent = "…";
 
     const hash = await sha256(canonicalList(state.ids));
 
@@ -165,7 +164,7 @@
     }
 
     state.hash = hash;
-    el.listHash.textContent = hash;
+    el.listHash.textContent = shortHash(hash);
 
     validate();
   }
@@ -210,7 +209,7 @@
   }
 
   async function animateRoulette(ids, winnerCount) {
-    const duration = 2650;
+    const duration = 2400;
     const startTime = performance.now();
 
     let iteration = 0;
@@ -223,19 +222,16 @@
       const elapsed = performance.now() - startTime;
       const percent = Math.min(99, Math.round((elapsed / duration) * 100));
 
-      el.rouletteProgress.textContent =
-        `Случайный выбор • ${percent}%`;
+      el.rouletteProgress.textContent = `${percent}%`;
 
       iteration += 1;
 
-      const wait =
-        42 + Math.min(100, iteration * 2.7);
+      const wait = 42 + Math.min(100, iteration * 2.7);
 
       await delay(wait);
     }
 
-    el.rouletteProgress.textContent =
-      `Фиксируем ${winnerCount} результат${winnerCount === 1 ? "" : "ов"}…`;
+    el.rouletteProgress.textContent = "Фиксируем результат…";
 
     await delay(320);
   }
@@ -246,12 +242,10 @@
     winners.forEach((id, index) => {
       const card = document.createElement("article");
       card.className = "result-card";
-      card.style.animationDelay =
-        `${Math.min(index, 20) * 35}ms`;
+      card.style.animationDelay = `${Math.min(index, 20) * 35}ms`;
 
       const label = document.createElement("span");
-      label.textContent =
-        `WINNER ${String(index + 1).padStart(2, "0")}`;
+      label.textContent = String(index + 1).padStart(2, "0");
 
       const value = document.createElement("strong");
       value.textContent = id;
@@ -283,18 +277,15 @@
     el.resultsSection.classList.add("hidden");
     el.drawStage.classList.remove("hidden");
 
-    el.drawStage.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
+    el.drawStage.scrollIntoView({ behavior: "smooth", block: "center" });
 
     try {
       await animateRoulette(drawIds, winnerCount);
 
-      const winners =
-        pickWithoutReplacement(drawIds, winnerCount);
-
+      const winners = pickWithoutReplacement(drawIds, winnerCount);
       state.winners = winners;
+
+      el.drawStage.classList.add("hit");
 
       if (winners.length === 1) {
         el.rouletteNumber.textContent = winners[0];
@@ -302,42 +293,23 @@
         el.rouletteNumber.textContent = "DONE";
       }
 
-      el.rouletteProgress.textContent =
-        "Розыгрыш завершён";
+      el.rouletteProgress.textContent = "Готово";
 
       renderResults(winners);
 
       const finishedAt = new Date();
 
-      el.drawSummary.textContent =
-        `${drawIds.length} участников • ${winners.length} выбранных ID`;
-
-      el.drawTime.textContent =
-        finishedAt.toLocaleString("ru-RU");
-
-      el.drawParticipants.textContent =
-        String(drawIds.length);
-
-      el.drawWinners.textContent =
-        String(winners.length);
-
-      el.drawHash.textContent =
-        drawHash;
+      el.drawTime.textContent = finishedAt.toLocaleString("ru-RU");
+      el.drawParticipants.textContent = String(drawIds.length);
+      el.drawHash.textContent = shortHash(drawHash);
 
       await delay(450);
 
       el.resultsSection.classList.remove("hidden");
-
-      el.resultsSection.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+      el.resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
       console.error(error);
-
-      showToast(
-        "Ошибка: браузер не поддерживает безопасный генератор."
-      );
+      showToast("Ошибка: браузер не поддерживает безопасный генератор");
     } finally {
       state.drawing = false;
       validate();
@@ -354,8 +326,7 @@
       showToast(successMessage);
       return;
     } catch (_) {
-      const textarea =
-        document.createElement("textarea");
+      const textarea = document.createElement("textarea");
 
       textarea.value = text;
       textarea.setAttribute("readonly", "");
@@ -363,10 +334,8 @@
       textarea.style.opacity = "0";
 
       document.body.appendChild(textarea);
-
       textarea.select();
       document.execCommand("copy");
-
       textarea.remove();
 
       showToast(successMessage);
@@ -390,15 +359,13 @@
     state.winners = [];
 
     el.drawStage.classList.add("hidden");
+    el.drawStage.classList.remove("hit");
     el.resultsSection.classList.add("hidden");
 
     el.rouletteNumber.textContent = "--------";
-    el.rouletteProgress.textContent = "Подготовка...";
+    el.rouletteProgress.textContent = "Подготовка…";
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   el.idsInput.addEventListener("input", updateIds);
@@ -426,17 +393,11 @@
   el.startBtn.addEventListener("click", startDraw);
 
   el.copyHashBtn.addEventListener("click", () => {
-    copyText(
-      state.hash,
-      "SHA-256 скопирован"
-    );
+    copyText(state.hash, "SHA-256 скопирован");
   });
 
   el.copyResultsBtn.addEventListener("click", () => {
-    copyText(
-      state.winners.join("\n"),
-      "ID скопированы — вставьте в Google Sheets"
-    );
+    copyText(state.winners.join("\n"), "Список скопирован");
   });
 
   el.newDrawBtn.addEventListener("click", resetDrawView);
