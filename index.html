@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17111f">
+  <title>Random Pinco — Open Random Draw</title>
+  <meta name="description" content="Open-source random ID draw for live broadcasts.">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="bg-orb bg-orb--one"></div>
+  <div class="bg-orb bg-orb--two"></div>
+
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Random Pinco">
+        <span class="brand-mark" aria-hidden="true">P</span>
+        <span class="brand-text">
+          <strong>RANDOM PINCO</strong>
+          <small>OPEN RANDOM DRAW</small>
+        </span>
+      </a>
+
+      <div class="trust-pill" title="Алгоритм находится в публичном JavaScript-файле">
+        <span class="trust-dot"></span>
+        OPEN SOURCE RANDOM
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">LIVE GIVEAWAY TOOL</span>
+        <h1>Честный розыгрыш<br><span>ID в прямом эфире</span></h1>
+        <p>
+          До 1000 уникальных ID. Случайный выбор выполняется локально
+          в браузере через Web Crypto API.
+        </p>
+      </div>
+
+      <div class="hero-badges" aria-label="Сведения о прозрачности">
+        <div class="mini-stat">
+          <strong>1000</strong>
+          <span>MAX IDs</span>
+        </div>
+        <div class="mini-stat">
+          <strong>SHA-256</strong>
+          <span>LIST HASH</span>
+        </div>
+        <div class="mini-stat">
+          <strong>CRYPTO</strong>
+          <span>RANDOM SOURCE</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace" id="workspace">
+      <div class="panel input-panel">
+        <div class="panel-head">
+          <div>
+            <span class="step">01</span>
+            <h2>Добавьте ID</h2>
+          </div>
+          <div class="counter"><strong id="idCount">0</strong> / 1000</div>
+        </div>
+
+        <label class="field-label" for="idsInput">ID участников</label>
+        <textarea
+          id="idsInput"
+          rows="13"
+          inputmode="numeric"
+          spellcheck="false"
+          placeholder="Вставьте ID — по одному в строке, через пробел или запятую.&#10;&#10;Например:&#10;12345678&#10;87654321&#10;10492837"
+        ></textarea>
+
+        <div class="input-meta">
+          <span id="duplicateInfo">Дубликатов: 0</span>
+          <button class="text-button" id="clearIdsBtn" type="button">Очистить</button>
+        </div>
+
+        <div class="hash-box">
+          <div>
+            <span>SHA-256 списка участников</span>
+            <code id="listHash">—</code>
+          </div>
+          <button class="icon-button" id="copyHashBtn" type="button" aria-label="Скопировать SHA-256" title="Скопировать SHA-256">⧉</button>
+        </div>
+      </div>
+
+      <div class="panel action-panel">
+        <div class="panel-head">
+          <div>
+            <span class="step">02</span>
+            <h2>Настройте розыгрыш</h2>
+          </div>
+        </div>
+
+        <label class="field-label" for="winnerCount">Сколько ID выбрать?</label>
+        <div class="number-control">
+          <button type="button" id="minusBtn" aria-label="Уменьшить количество">−</button>
+          <input id="winnerCount" type="number" min="1" max="1000" value="5" inputmode="numeric">
+          <button type="button" id="plusBtn" aria-label="Увеличить количество">+</button>
+        </div>
+
+        <div class="validation" id="validationMessage" aria-live="polite">
+          Добавьте ID участников, чтобы начать.
+        </div>
+
+        <button class="start-button" id="startBtn" type="button" disabled>
+          <span class="start-icon">▶</span>
+          <span>START</span>
+        </button>
+
+        <div class="transparency">
+          <div class="transparency-icon">✓</div>
+          <div>
+            <strong>Прозрачный алгоритм</strong>
+            <p>Победители выбираются без повторов с помощью <code>crypto.getRandomValues()</code>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="draw-stage is-hidden" id="drawStage" aria-live="polite">
+      <div class="stage-head">
+        <div>
+          <span class="eyebrow">DRAW IN PROGRESS</span>
+          <h2 id="stageTitle">Выбираем победителей</h2>
+        </div>
+        <span class="live-badge"><i></i> LIVE</span>
+      </div>
+
+      <div class="roulette">
+        <span class="roulette-label">RANDOM ID</span>
+        <strong id="rouletteNumber">--------</strong>
+        <span class="roulette-progress" id="rouletteProgress">Подготовка...</span>
+      </div>
+    </section>
+
+    <section class="results-section is-hidden" id="resultsSection">
+      <div class="results-head">
+        <div>
+          <span class="eyebrow">DRAW COMPLETE</span>
+          <h2>Выбранные ID</h2>
+          <p id="drawSummary"></p>
+        </div>
+
+        <button class="copy-button" id="copyResultsBtn" type="button">
+          <span>⧉</span>
+          COPY FOR GOOGLE SHEETS
+        </button>
+      </div>
+
+      <div class="results-grid" id="resultsGrid"></div>
+
+      <div class="audit-grid">
+        <div class="audit-item">
+          <span>Дата и время</span>
+          <strong id="drawTime">—</strong>
+        </div>
+        <div class="audit-item">
+          <span>Участников</span>
+          <strong id="drawParticipants">—</strong>
+        </div>
+        <div class="audit-item">
+          <span>Выбрано</span>
+          <strong id="drawWinners">—</strong>
+        </div>
+        <div class="audit-item audit-item--wide">
+          <span>SHA-256 списка</span>
+          <code id="drawHash">—</code>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="secondary-button" id="newDrawBtn" type="button">Новый розыгрыш</button>
+      </div>
+    </section>
+
+    <footer>
+      <div>
+        <strong>RANDOM PINCO</strong>
+        <span>Client-side • No server • Open source friendly</span>
+      </div>
+      <p>
+        Все вычисления выполняются в вашем браузере. Список ID не отправляется на сервер.
+      </p>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
