@@ -1,0 +1,1595 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2b0004">
+  <title>PINCO — Tasodifiy tanlov</title>
+  <meta name="description" content="PINCO ishtirokchilari uchun halol tasodifiy tanlov.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg-0: #170003;
+  --bg-1: #3a0008;
+  --panel: rgba(58, 4, 10, .50);
+  --panel-2: rgba(24, 0, 3, .55);
+  --field: rgba(14, 0, 2, .65);
+
+  --gold: #f0b93a;
+  --gold-soft: #ffe29a;
+  --gold-line: rgba(240, 185, 58, .38);
+
+  --crimson: #ff2b12;
+  --crimson-deep: #7c0000;
+
+  --teal: #2fe6b8;
+  --teal-soft: rgba(47, 230, 184, .18);
+
+  --ink: #fff6ec;
+  --muted: rgba(255, 246, 236, .58);
+  --danger: #ff6d6d;
+
+  --r-lg: 22px;
+  --r-md: 14px;
+
+  --display: "Unbounded", "Inter", sans-serif;
+  --body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: dark; scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: var(--body);
+  background:
+    radial-gradient(circle at 84% 8%, rgba(255, 60, 20, .30), transparent 32%),
+    radial-gradient(circle at 6% 96%, rgba(120, 0, 0, .40), transparent 38%),
+    linear-gradient(160deg, #12000a 0%, var(--bg-1) 46%, #5c0009 78%, #1a0002 100%);
+  overflow-x: hidden;
+}
+
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .4; }
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- SIGNATURE BACKGROUND: target + dart ---------- */
+.fx {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fx-target {
+  position: absolute;
+  top: 50%;
+  right: -6vw;
+  width: 62vw;
+  max-width: 900px;
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  opacity: .16;
+  background:
+    radial-gradient(circle, transparent 0 13%, var(--crimson) 13% 15.5%, transparent 15.5% 30%,
+      var(--gold) 30% 32.5%, transparent 32.5% 47%, var(--crimson) 47% 49.5%,
+      transparent 49.5% 64%, var(--gold) 64% 66.5%, transparent 66.5% 81%,
+      var(--crimson) 81% 83.5%, transparent 83.5%);
+  filter: blur(.4px);
+}
+
+.fx-dart {
+  position: absolute;
+  top: 38%;
+  right: 22%;
+  width: 210px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--teal) 55%, var(--teal));
+  border-radius: 3px;
+  transform-origin: right center;
+  opacity: 0;
+  animation: dartFly 2.4s .3s ease-out 1;
+}
+
+.fx-dart::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: 0; height: 0;
+  transform: translateY(-50%);
+  border-style: solid;
+  border-width: 6px 0 6px 11px;
+  border-color: transparent transparent transparent var(--teal);
+}
+
+@keyframes dartFly {
+  0% { opacity: 0; transform: rotate(-18deg) scaleX(0); }
+  18% { opacity: 1; }
+  55% { opacity: 1; transform: rotate(0deg) scaleX(1); }
+  100% { opacity: 0; transform: rotate(0deg) scaleX(1); }
+}
+
+.fx-glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  filter: blur(120px);
+}
+
+.fx-glow-a { top: -220px; right: 2%; background: rgba(255, 30, 10, .22); }
+.fx-glow-b { bottom: -260px; left: -140px; background: rgba(240, 185, 58, .10); }
+
+/* ---------- LAYOUT ---------- */
+.shell {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 34px 0 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 4px 4px 28px;
+}
+
+.logo {
+  display: block;
+  width: 176px;
+  height: auto;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .35));
+}
+
+.top-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(30, 0, 4, .45);
+}
+
+.lang-btn {
+  padding: 8px 14px;
+  border: 0;
+  border-left: 1px solid var(--gold-line);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  transition: color .15s ease, background .15s ease;
+}
+
+.lang-btn:first-child { border-left: 0; }
+
+.lang-btn:hover:not(.active) { color: var(--gold-soft); }
+
+.lang-btn.active {
+  color: #2a0700;
+  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
+}
+
+.local-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  background: rgba(30, 0, 4, .45);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.local-tag i {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 10px rgba(47, 230, 184, .9);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+/* ---------- PANELS ---------- */
+.panel {
+  position: relative;
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-lg);
+  background: linear-gradient(175deg, var(--panel), var(--panel-2));
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 220, 150, .06);
+  padding: 28px;
+}
+
+.panel-ids { padding-bottom: 20px; }
+
+.panel-run {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 24px;
+  margin-bottom: 20px;
+}
+
+.panel-head h1,
+.panel-head h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+
+.count {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.count strong { color: var(--ink); font-size: 15px; }
+
+/* TEXTAREA */
+#idsInput {
+  width: 100%;
+  min-height: 380px;
+  resize: vertical;
+  padding: 20px 22px;
+  border: 1px solid rgba(220, 90, 20, .45);
+  border-radius: var(--r-md);
+  outline: none;
+  background: linear-gradient(180deg, rgba(12, 0, 2, .82), rgba(24, 0, 2, .70));
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: .015em;
+  line-height: 1.75;
+  box-shadow: inset 0 8px 34px rgba(0, 0, 0, .25);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+#idsInput:focus {
+  border-color: var(--gold);
+  box-shadow: inset 0 8px 34px rgba(0, 0, 0, .22), 0 0 0 3px rgba(240, 185, 58, .10);
+}
+
+#idsInput::placeholder { color: rgba(255, 255, 255, .32); font-weight: 500; }
+
+.ids-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.text-btn {
+  border: 0;
+  background: transparent;
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  padding: 6px 2px;
+}
+
+.text-btn:hover { color: var(--gold-soft); }
+
+.text-btn-fill {
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  padding: 10px 18px;
+  background: rgba(30, 0, 4, .4);
+}
+
+.hash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(207, 76, 0, .45);
+  border-radius: 999px;
+  padding: 7px 8px 7px 14px;
+  background: rgba(30, 0, 4, .45);
+}
+
+.hash-chip span {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  color: var(--gold);
+}
+
+.hash-chip code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: rgba(255, 255, 255, .8);
+  background: rgba(0, 0, 0, .3);
+  padding: 4px 9px;
+  border-radius: 999px;
+}
+
+/* STEPPER */
+.stepper {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 56px;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stepper button,
+.stepper input {
+  height: 58px;
+  border: 1px solid rgba(187, 51, 0, .55);
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(38, 0, 0, .85), rgba(18, 0, 0, .9));
+  border-radius: var(--r-md);
+}
+
+.stepper button {
+  font-size: 24px;
+  font-weight: 600;
+  transition: border-color .18s ease, transform .12s ease;
+}
+
+.stepper button:hover { border-color: var(--gold); }
+.stepper button:active { transform: translateY(1px); }
+
+.stepper input {
+  min-width: 0;
+  text-align: center;
+  outline: none;
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
+  appearance: textfield;
+}
+
+.stepper input::-webkit-inner-spin-button,
+.stepper input::-webkit-outer-spin-button { display: none; }
+
+.stepper input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(240, 185, 58, .10);
+}
+
+/* EXCLUDE INFO (auto — winners are always removed from the pool) */
+.exclude-info {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  border: 1px solid var(--teal-soft);
+  border-radius: 999px;
+  background: rgba(47, 230, 184, .06);
+  font-size: 11.5px;
+  color: var(--teal);
+}
+
+.exclude-info i {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 8px rgba(47, 230, 184, .9);
+}
+
+.exclude-info strong { color: var(--gold-soft); }
+
+.validation {
+  min-height: 20px;
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.validation.ok { color: var(--teal); }
+.validation.error { color: var(--danger); }
+
+/* START */
+.start {
+  position: relative;
+  margin-top: auto;
+  width: 100%;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--gold-soft);
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 78% 12%, rgba(255, 255, 255, .16), transparent 26%),
+    linear-gradient(180deg, var(--crimson) 0%, var(--crimson-deep) 100%);
+  box-shadow:
+    0 0 26px rgba(255, 40, 10, .28),
+    inset 0 1px 0 rgba(255, 255, 255, .22);
+  transition: transform .15s ease, box-shadow .18s ease, filter .18s ease;
+}
+
+.start-ring {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, .18);
+  right: -40px;
+  top: -40px;
+}
+
+.start-label {
+  position: relative;
+  font-family: var(--display);
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+}
+
+.start:not(:disabled):hover {
+  transform: translateY(-2px);
+  filter: brightness(1.07);
+  box-shadow: 0 0 40px rgba(255, 64, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .24);
+}
+
+.start:not(:disabled):active { transform: translateY(0); }
+
+/* ---------- DRAW STAGE ---------- */
+.stage {
+  margin-top: 16px;
+  padding: 30px;
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-lg);
+  background: linear-gradient(175deg, var(--panel), var(--panel-2));
+  backdrop-filter: blur(18px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
+  text-align: center;
+}
+
+.stage-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  background: rgba(30, 0, 4, .5);
+  color: var(--gold-soft);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.stage-badge i {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--crimson);
+  box-shadow: 0 0 12px rgba(255, 40, 10, .9);
+  animation: livePulse 1s ease-in-out infinite;
+}
+
+.roulette {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  border: 1px solid rgba(240, 185, 58, .4);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at center, rgba(255, 60, 0, .14), transparent 45%),
+    linear-gradient(180deg, rgba(15, 0, 0, .9), rgba(35, 0, 0, .9));
+  transition: box-shadow .4s ease;
+}
+
+.stage.hit .roulette {
+  box-shadow: 0 0 0 3px var(--teal-soft), 0 0 40px rgba(47, 230, 184, .35);
+}
+
+.roulette strong {
+  font-family: var(--mono);
+  font-size: clamp(42px, 7.5vw, 76px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--ink);
+  text-shadow: 0 0 26px rgba(255, 49, 0, .35);
+}
+
+#rouletteProgress {
+  color: var(--muted);
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+/* ---------- RESULTS (centered overlay) ---------- */
+.results {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(90, 10, 10, .55), transparent 55%),
+    rgba(6, 0, 1, .86);
+  backdrop-filter: blur(6px);
+  animation: overlayIn .25s ease both;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.confetti-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -30px;
+  width: 10px;
+  height: 16px;
+  opacity: .95;
+  animation-name: confettiFall;
+  animation-timing-function: cubic-bezier(.25, .46, .45, .94);
+  animation-fill-mode: forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes confettiFall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translate(var(--drift, 40px), 118vh) rotate(620deg); opacity: 0; }
+}
+
+.results-panel {
+  position: relative;
+  z-index: 1;
+  width: min(720px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 30px;
+  border: 1px solid var(--gold-line);
+  border-radius: var(--r-lg);
+  background: linear-gradient(175deg, rgba(58, 4, 10, .95), rgba(20, 0, 3, .98));
+  box-shadow: 0 40px 100px rgba(0, 0, 0, .6), 0 0 0 1px rgba(240, 185, 58, .06),
+    0 0 70px rgba(47, 230, 184, .16);
+  animation: panelIn .5s cubic-bezier(.2, .8, .25, 1.35) both, panelGlow 1.8s ease .5s 2;
+}
+
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(24px) scale(.9); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes panelGlow {
+  0%, 100% { box-shadow: 0 40px 100px rgba(0, 0, 0, .6), 0 0 0 1px rgba(240, 185, 58, .06), 0 0 70px rgba(47, 230, 184, .16); }
+  50% { box-shadow: 0 40px 100px rgba(0, 0, 0, .6), 0 0 0 1px rgba(240, 185, 58, .12), 0 0 110px rgba(47, 230, 184, .34); }
+}
+
+.results-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--gold-line);
+  border-radius: 50%;
+  background: rgba(30, 0, 4, .5);
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.results-close:hover { color: var(--gold-soft); border-color: var(--gold); }
+
+.results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding-right: 30px;
+}
+
+.results-head h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 15px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.result-card {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 20px;
+  border: 1px solid rgba(220, 74, 0, .5);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(50, 0, 0, .7), rgba(20, 0, 0, .8));
+  animation: resultIn .5s cubic-bezier(.2, .8, .25, 1.4) both, hitFlash .9s ease .15s;
+}
+
+.result-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--teal), var(--gold-soft));
+}
+
+.result-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+.result-card strong {
+  font-family: var(--mono);
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: .015em;
+}
+
+.audit {
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.audit .dot { margin: 0 8px; color: var(--gold-line); }
+.audit code { color: rgba(255, 255, 255, .78); }
+
+/* ---------- FOOTER ---------- */
+.foot {
+  margin-top: 26px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .01em;
+}
+
+/* ---------- TOAST ---------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 50;
+  transform: translate(-50%, 16px);
+  padding: 12px 18px;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  background: rgba(25, 0, 3, .96);
+  color: var(--ink);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
+  font-size: 12.5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.hidden { display: none !important; }
+
+@keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+
+@keyframes resultIn {
+  from { opacity: 0; transform: translateY(16px) scale(.85); }
+  60% { opacity: 1; transform: translateY(-3px) scale(1.04); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes hitFlash {
+  0% { box-shadow: 0 0 0 0 rgba(47, 230, 184, 0); }
+  35% { box-shadow: 0 0 0 4px rgba(47, 230, 184, .45); }
+  100% { box-shadow: 0 0 0 0 rgba(47, 230, 184, 0); }
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .shell { width: min(100% - 20px, 1180px); padding-top: 20px; }
+  .top { flex-wrap: wrap; gap: 14px; }
+  .logo { width: 130px; }
+  .top-right { align-items: flex-start; width: 100%; flex-direction: row; justify-content: space-between; }
+  .lang-btn { padding: 7px 11px; font-size: 10px; }
+  .local-tag { font-size: 9px; padding: 7px 11px; }
+  .panel, .stage, .results { padding: 18px; border-radius: 16px; }
+  #idsInput { min-height: 300px; font-size: 16px; }
+  .start-label { font-size: 22px; }
+  .results-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .result-card strong { font-size: 21px; }
+  .ids-foot { flex-wrap: wrap; }
+  .results-panel { padding: 22px; max-height: 92vh; }
+}
+
+</style>
+</head>
+
+<body>
+  <div class="fx" aria-hidden="true">
+    <div class="fx-target"></div>
+    <div class="fx-dart"></div>
+    <div class="fx-glow fx-glow-a"></div>
+    <div class="fx-glow fx-glow-b"></div>
+  </div>
+
+  <main class="shell">
+    <header class="top">
+      <img src="data:image/png;base64,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" alt="PINCO" class="logo">
+
+      <div class="top-right">
+        <div class="lang-switch" role="group" aria-label="Til / Язык / Language">
+          <button type="button" class="lang-btn" data-lang="uz">UZ</button>
+          <button type="button" class="lang-btn" data-lang="ru">RU</button>
+          <button type="button" class="lang-btn" data-lang="en">ENG</button>
+        </div>
+        <div class="local-tag"><i></i><span data-i18n="localTag">brauzeringizda, lokal</span></div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <!-- PARTICIPANTS -->
+      <section class="panel panel-ids">
+        <div class="panel-head">
+          <h1 data-i18n="participantsTitle">Ishtirokchilar</h1>
+          <div class="count"><strong id="idCount">0</strong><span>/ 1000</span></div>
+        </div>
+
+        <textarea
+          id="idsInput"
+          rows="16"
+          spellcheck="false"
+          placeholder="76776459&#10;59304469&#10;79696025&#10;45798645&#10;21087928"
+        ></textarea>
+
+        <div class="ids-foot">
+          <button id="clearIdsBtn" type="button" class="text-btn" data-i18n="clearBtn">Tozalash</button>
+          <button id="copyHashBtn" type="button" class="hash-chip" data-i18n-aria="hashCopyAria" aria-label="Ro'yxat SHA-256 xeshini nusxalash">
+            <span>SHA-256</span>
+            <code id="listHash">—</code>
+          </button>
+        </div>
+      </section>
+
+      <!-- SETTINGS / START -->
+      <section class="panel panel-run">
+        <div class="panel-head">
+          <h2 data-i18n="winnersTitle">G'oliblar soni</h2>
+        </div>
+
+        <div class="stepper">
+          <button type="button" id="minusBtn" data-i18n-aria="decreaseAria" aria-label="Kamaytirish">−</button>
+          <input id="winnerCount" type="number" min="1" max="1000" value="5" inputmode="numeric">
+          <button type="button" id="plusBtn" data-i18n-aria="increaseAria" aria-label="Ko'paytirish">+</button>
+        </div>
+
+        <div id="excludeInfo" class="exclude-info hidden">
+          <i></i>
+          <span id="excludeInfoText"></span>
+        </div>
+
+        <div id="validationMessage" class="validation" aria-live="polite"></div>
+
+        <button id="startBtn" type="button" class="start" disabled>
+          <span class="start-ring"></span>
+          <span class="start-label" data-i18n="startBtn">BOSHLASH</span>
+        </button>
+      </section>
+    </section>
+
+    <!-- DRAW -->
+    <section id="drawStage" class="stage hidden">
+      <span class="stage-badge"><i></i><span data-i18n="drawBadge">tanlov ketmoqda</span></span>
+      <div class="roulette">
+        <strong id="rouletteNumber">--------</strong>
+        <span id="rouletteProgress"></span>
+      </div>
+    </section>
+
+    <footer class="foot" data-i18n="footerNote">
+      Tanlov butunlay brauzeringizda amalga oshiriladi. Ishtirokchilar ma'lumotlari hech qayerga yuborilmaydi.
+    </footer>
+  </main>
+
+  <!-- RESULTS OVERLAY -->
+  <section id="resultsSection" class="results hidden">
+    <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+
+    <div class="results-panel">
+      <button id="closeResultsBtn" type="button" class="results-close" data-i18n-aria="closeAria" aria-label="Yopish">×</button>
+
+      <div class="results-head">
+        <h2 data-i18n="winnersHeading">G'oliblar</h2>
+        <button id="copyResultsBtn" type="button" class="text-btn text-btn-fill" data-i18n="copyResultsBtn">Ro'yxatni nusxalash</button>
+      </div>
+
+      <div id="resultsGrid" class="results-grid"></div>
+
+      <div class="audit">
+        <span id="drawTime">—</span>
+        <span class="dot">·</span>
+        <span id="drawParticipants">—</span> <span data-i18n="auditParticipants">ishtirokchi</span>
+        <span class="dot">·</span>
+        <span data-i18n="auditHashLabel">xesh</span> <code id="drawHash">—</code>
+      </div>
+
+      <button id="newDrawBtn" type="button" class="text-btn" data-i18n="newDrawBtn">Yangi tanlov</button>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+(() => {
+  "use strict";
+
+  const MAX_IDS = 1000;
+  const DEFAULT_WINNERS = 5;
+  const LANG_KEY = "pinco_lang";
+
+  /* ---------------- I18N ---------------- */
+
+  const I18N = {
+    uz: {
+      pageTitle: "PINCO — Tasodifiy tanlov",
+      metaDescription: "PINCO ishtirokchilari uchun halol tasodifiy tanlov.",
+      localTag: "brauzeringizda, lokal",
+      participantsTitle: "Ishtirokchilar",
+      clearBtn: "Tozalash",
+      hashCopyAria: "Ro'yxat SHA-256 xeshini nusxalash",
+      winnersTitle: "G'oliblar soni",
+      decreaseAria: "Kamaytirish",
+      increaseAria: "Ko'paytirish",
+      excludeInfo: "oldin g'olib chiqqanlar qatnashmaydi — {n} ta",
+      vAddParticipants: "Boshlash uchun ishtirokchilarni qo'shing",
+      vLimit: "Limit — {max} ta noyob ID",
+      vAllWon: "Yangi ro'yxat qo'shilishini kutmoqda",
+      vMinOne: "Kamida 1 ta ID tanlanishi kerak",
+      vAvailable: "Mavjud: {pool} ta ID",
+      vReady: "{pool} ishtirokchi → {winners} g'olib",
+      startBtn: "BOSHLASH",
+      drawBadge: "tanlov ketmoqda",
+      progressPreparing: "Tayyorlanmoqda…",
+      progressFinalizing: "Natija aniqlanmoqda…",
+      progressDone: "Tayyor",
+      doneLabel: "TAYYOR",
+      footerNote: "Tanlov butunlay brauzeringizda amalga oshiriladi. Ishtirokchilar ma'lumotlari hech qayerga yuborilmaydi.",
+      winnersHeading: "G'oliblar",
+      copyResultsBtn: "Ro'yxatni nusxalash",
+      auditParticipants: "ishtirokchi",
+      auditHashLabel: "xesh",
+      newDrawBtn: "Yangi tanlov",
+      closeAria: "Yopish",
+      hashCopied: "SHA-256 nusxalandi",
+      listCopied: "Ro'yxat nusxalandi",
+      genError: "Xatolik: brauzer xavfsiz generatorni qo'llab-quvvatlamaydi",
+      localeCode: "uz-UZ"
+    },
+
+    ru: {
+      pageTitle: "PINCO — Случайный розыгрыш",
+      metaDescription: "Честный случайный розыгрыш среди участников PINCO.",
+      localTag: "локально, в браузере",
+      participantsTitle: "Участники",
+      clearBtn: "Очистить",
+      hashCopyAria: "Скопировать SHA-256 хэш списка",
+      winnersTitle: "Количество победителей",
+      decreaseAria: "Уменьшить",
+      increaseAria: "Увеличить",
+      excludeInfo: "предыдущие победители не участвуют — {n}",
+      vAddParticipants: "Добавьте участников, чтобы начать",
+      vLimit: "Лимит — {max} уникальных ID",
+      vAllWon: "Ожидаем новый список участников",
+      vMinOne: "Нужно выбрать хотя бы 1 ID",
+      vAvailable: "Доступно: {pool} ID",
+      vReady: "{pool} участников → {winners} победителей",
+      startBtn: "СТАРТ",
+      drawBadge: "идёт розыгрыш",
+      progressPreparing: "Подготовка…",
+      progressFinalizing: "Фиксируем результат…",
+      progressDone: "Готово",
+      doneLabel: "ГОТОВО",
+      footerNote: "Розыгрыш полностью выполняется в вашем браузере. Данные участников никуда не отправляются.",
+      winnersHeading: "Победители",
+      copyResultsBtn: "Копировать список",
+      auditParticipants: "участников",
+      auditHashLabel: "хэш",
+      newDrawBtn: "Новый розыгрыш",
+      closeAria: "Закрыть",
+      hashCopied: "SHA-256 скопирован",
+      listCopied: "Список скопирован",
+      genError: "Ошибка: браузер не поддерживает безопасный генератор",
+      localeCode: "ru-RU"
+    },
+
+    en: {
+      pageTitle: "PINCO — Random Draw",
+      metaDescription: "A fair random draw for PINCO participants.",
+      localTag: "local, in your browser",
+      participantsTitle: "Participants",
+      clearBtn: "Clear",
+      hashCopyAria: "Copy the list's SHA-256 hash",
+      winnersTitle: "Number of winners",
+      decreaseAria: "Decrease",
+      increaseAria: "Increase",
+      excludeInfo: "previous winners are excluded — {n}",
+      vAddParticipants: "Add participants to get started",
+      vLimit: "Limit — {max} unique IDs",
+      vAllWon: "Waiting for a new participant list",
+      vMinOne: "Select at least 1 ID",
+      vAvailable: "Available: {pool} IDs",
+      vReady: "{pool} participants → {winners} winners",
+      startBtn: "START",
+      drawBadge: "draw in progress",
+      progressPreparing: "Preparing…",
+      progressFinalizing: "Finalizing the result…",
+      progressDone: "Done",
+      doneLabel: "DONE",
+      footerNote: "The draw runs entirely in your browser. Participant data is never sent anywhere.",
+      winnersHeading: "Winners",
+      copyResultsBtn: "Copy list",
+      auditParticipants: "participants",
+      auditHashLabel: "hash",
+      newDrawBtn: "New draw",
+      closeAria: "Close",
+      hashCopied: "SHA-256 copied",
+      listCopied: "List copied",
+      genError: "Error: your browser doesn't support a secure generator",
+      localeCode: "en-GB"
+    }
+  };
+
+  function readStoredLang() {
+    try {
+      const stored = localStorage.getItem(LANG_KEY);
+      if (stored && I18N[stored]) return stored;
+    } catch (_) { /* ignore */ }
+    return "uz";
+  }
+
+  let lang = readStoredLang();
+
+  function t(key, vars) {
+    const dict = I18N[lang] || I18N.uz;
+    let str = dict[key] ?? I18N.uz[key] ?? key;
+
+    if (vars) {
+      str = str.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? vars[k] : `{${k}}`));
+    }
+
+    return str;
+  }
+
+  /* ---------------- DOM ---------------- */
+
+  const el = {
+    idsInput: document.getElementById("idsInput"),
+    idCount: document.getElementById("idCount"),
+
+    listHash: document.getElementById("listHash"),
+    copyHashBtn: document.getElementById("copyHashBtn"),
+    clearIdsBtn: document.getElementById("clearIdsBtn"),
+
+    winnerCount: document.getElementById("winnerCount"),
+    minusBtn: document.getElementById("minusBtn"),
+    plusBtn: document.getElementById("plusBtn"),
+
+    excludeInfo: document.getElementById("excludeInfo"),
+    excludeInfoText: document.getElementById("excludeInfoText"),
+
+    validation: document.getElementById("validationMessage"),
+    startBtn: document.getElementById("startBtn"),
+
+    drawStage: document.getElementById("drawStage"),
+    rouletteNumber: document.getElementById("rouletteNumber"),
+    rouletteProgress: document.getElementById("rouletteProgress"),
+
+    resultsSection: document.getElementById("resultsSection"),
+    resultsGrid: document.getElementById("resultsGrid"),
+    drawTime: document.getElementById("drawTime"),
+    drawParticipants: document.getElementById("drawParticipants"),
+    drawHash: document.getElementById("drawHash"),
+
+    copyResultsBtn: document.getElementById("copyResultsBtn"),
+    newDrawBtn: document.getElementById("newDrawBtn"),
+    closeResultsBtn: document.getElementById("closeResultsBtn"),
+
+    confettiLayer: document.getElementById("confettiLayer"),
+
+    langBtns: document.querySelectorAll(".lang-btn"),
+
+    toast: document.getElementById("toast")
+  };
+
+  // Winners are ALWAYS removed from the pool automatically.
+  // The exclusion list only resets when the participant list itself changes.
+  let state = {
+    ids: [],
+    duplicates: 0,
+    overLimit: false,
+    hash: "—",
+    winners: [],
+    drawing: false,
+    hashRevision: 0,
+    excludedIds: new Set()
+  };
+
+  /* ---------------- language application ---------------- */
+
+  function applyStaticTranslations() {
+    document.documentElement.lang = lang;
+    document.title = t("pageTitle");
+
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", t("metaDescription"));
+
+    document.querySelectorAll("[data-i18n]").forEach(node => {
+      node.textContent = t(node.getAttribute("data-i18n"));
+    });
+
+    document.querySelectorAll("[data-i18n-aria]").forEach(node => {
+      node.setAttribute("aria-label", t(node.getAttribute("data-i18n-aria")));
+    });
+
+    el.langBtns.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.lang === lang);
+    });
+  }
+
+  function setLanguage(nextLang) {
+    if (!I18N[nextLang] || nextLang === lang) return;
+
+    lang = nextLang;
+
+    try { localStorage.setItem(LANG_KEY, lang); } catch (_) { /* ignore */ }
+
+    applyStaticTranslations();
+    updateExcludeInfo();
+
+    if (!el.drawStage.classList.contains("hidden") && !state.drawing) {
+      el.rouletteProgress.textContent = t("progressDone");
+    } else if (el.drawStage.classList.contains("hidden")) {
+      el.rouletteProgress.textContent = t("progressPreparing");
+    }
+
+    validate();
+  }
+
+  /* ---------------- parsing / hashing ---------------- */
+
+  function parseIds(text) {
+    const tokens = text
+      .split(/[\s,;]+/)
+      .map(value => value.trim())
+      .filter(Boolean);
+
+    const unique = [];
+    const seen = new Set();
+
+    for (const token of tokens) {
+      if (!seen.has(token)) {
+        seen.add(token);
+        unique.push(token);
+      }
+    }
+
+    return {
+      ids: unique.slice(0, MAX_IDS),
+      duplicates: Math.max(0, tokens.length - unique.length),
+      overLimit: unique.length > MAX_IDS
+    };
+  }
+
+  function canonicalList(ids) {
+    return ids.join("\n");
+  }
+
+  async function sha256(text) {
+    if (!window.crypto?.subtle) {
+      return "SHA-256 unavailable";
+    }
+
+    const encoded = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest("SHA-256", encoded);
+
+    return [...new Uint8Array(digest)]
+      .map(byte => byte.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  function shortHash(hash) {
+    if (!hash || hash === "—" || hash.length < 16) return hash;
+    return `${hash.slice(0, 8)}…${hash.slice(-8)}`;
+  }
+
+  function getWinnerCount() {
+    const value = Number.parseInt(el.winnerCount.value, 10);
+    return Number.isFinite(value) ? value : DEFAULT_WINNERS;
+  }
+
+  // Pool = all loaded IDs minus everyone who has already won (auto).
+  function getPool() {
+    if (state.excludedIds.size === 0) {
+      return state.ids;
+    }
+    return state.ids.filter(id => !state.excludedIds.has(id));
+  }
+
+  function setWinnerCount(value) {
+    const max = Math.max(1, getPool().length || MAX_IDS);
+    const normalized = Math.max(1, Math.min(max, Number(value) || 1));
+
+    el.winnerCount.value = String(normalized);
+    validate();
+  }
+
+  function updateExcludeInfo() {
+    const active = state.excludedIds.size > 0;
+    el.excludeInfo.classList.toggle("hidden", !active);
+    el.excludeInfoText.textContent = t("excludeInfo", { n: state.excludedIds.size });
+  }
+
+  function validate() {
+    const winners = getWinnerCount();
+    const pool = getPool();
+
+    let message = "";
+    let className = "validation";
+
+    if (state.ids.length === 0) {
+      message = t("vAddParticipants");
+    } else if (state.overLimit) {
+      message = t("vLimit", { max: MAX_IDS });
+      className += " error";
+    } else if (pool.length === 0) {
+      // Everyone already won — stay quiet, no scary error, just wait for a new list.
+      message = t("vAllWon");
+    } else if (winners < 1) {
+      message = t("vMinOne");
+      className += " error";
+    } else if (winners > pool.length) {
+      message = t("vAvailable", { pool: pool.length });
+      className += " error";
+    } else {
+      message = t("vReady", { pool: pool.length, winners });
+      className += " ok";
+    }
+
+    el.validation.textContent = message;
+    el.validation.className = className;
+
+    el.startBtn.disabled =
+      state.drawing ||
+      pool.length === 0 ||
+      winners < 1 ||
+      winners > pool.length;
+
+    updateExcludeInfo();
+  }
+
+  async function updateIds() {
+    const revision = ++state.hashRevision;
+    const parsed = parseIds(el.idsInput.value);
+
+    state.ids = parsed.ids;
+    state.duplicates = parsed.duplicates;
+    state.overLimit = parsed.overLimit;
+    state.excludedIds = new Set(); // new list -> nobody has won yet
+
+    el.idCount.textContent = String(state.ids.length);
+
+    if (!state.ids.length) {
+      state.hash = "—";
+      el.listHash.textContent = "—";
+      validate();
+      return;
+    }
+
+    el.listHash.textContent = "…";
+
+    const hash = await sha256(canonicalList(state.ids));
+
+    if (revision !== state.hashRevision) {
+      return;
+    }
+
+    state.hash = hash;
+    el.listHash.textContent = shortHash(hash);
+
+    validate();
+  }
+
+  /* ---------------- randomness ---------------- */
+
+  function secureRandomIndex(maxExclusive) {
+    if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) {
+      throw new Error("Invalid random range");
+    }
+
+    const RANGE = 0x100000000;
+    const limit = Math.floor(RANGE / maxExclusive) * maxExclusive;
+    const buffer = new Uint32Array(1);
+
+    let value;
+
+    do {
+      crypto.getRandomValues(buffer);
+      value = buffer[0];
+    } while (value >= limit);
+
+    return value % maxExclusive;
+  }
+
+  function pickWithoutReplacement(source, count) {
+    const pool = [...source];
+    const winners = [];
+
+    for (let i = 0; i < count; i++) {
+      const index = secureRandomIndex(pool.length);
+
+      winners.push(pool[index]);
+
+      pool[index] = pool[pool.length - 1];
+      pool.pop();
+    }
+
+    return winners;
+  }
+
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async function animateRoulette(ids) {
+    const duration = 2400;
+    const startTime = performance.now();
+
+    let iteration = 0;
+
+    while (performance.now() - startTime < duration) {
+      const previewId = ids[secureRandomIndex(ids.length)];
+
+      el.rouletteNumber.textContent = previewId;
+
+      const elapsed = performance.now() - startTime;
+      const percent = Math.min(99, Math.round((elapsed / duration) * 100));
+
+      el.rouletteProgress.textContent = `${percent}%`;
+
+      iteration += 1;
+
+      const wait = 42 + Math.min(100, iteration * 2.7);
+
+      await delay(wait);
+    }
+
+    el.rouletteProgress.textContent = t("progressFinalizing");
+
+    await delay(320);
+  }
+
+  function renderResults(winners) {
+    el.resultsGrid.replaceChildren();
+
+    winners.forEach((id, index) => {
+      const card = document.createElement("article");
+      card.className = "result-card";
+      card.style.animationDelay = `${Math.min(index, 20) * 55}ms`;
+
+      const label = document.createElement("span");
+      label.textContent = String(index + 1).padStart(2, "0");
+
+      const value = document.createElement("strong");
+      value.textContent = id;
+
+      card.append(label, value);
+      el.resultsGrid.appendChild(card);
+    });
+  }
+
+  async function startDraw() {
+    if (state.drawing) {
+      return;
+    }
+
+    const winnerCount = getWinnerCount();
+
+    validate();
+
+    if (el.startBtn.disabled) {
+      return;
+    }
+
+    state.drawing = true;
+    validate();
+
+    const drawIds = getPool();
+    const drawHash = state.hash;
+
+    el.resultsSection.classList.add("hidden");
+    el.drawStage.classList.remove("hidden");
+
+    el.drawStage.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    try {
+      await animateRoulette(drawIds);
+
+      const winners = pickWithoutReplacement(drawIds, winnerCount);
+      state.winners = winners;
+
+      // Every winner is permanently removed from the pool from now on.
+      winners.forEach(id => state.excludedIds.add(id));
+
+      el.drawStage.classList.add("hit");
+
+      if (winners.length === 1) {
+        el.rouletteNumber.textContent = winners[0];
+      } else {
+        el.rouletteNumber.textContent = t("doneLabel");
+      }
+
+      el.rouletteProgress.textContent = t("progressDone");
+
+      renderResults(winners);
+
+      const finishedAt = new Date();
+
+      el.drawTime.textContent = finishedAt.toLocaleString(t("localeCode"));
+      el.drawParticipants.textContent = String(drawIds.length);
+      el.drawHash.textContent = shortHash(drawHash);
+
+      await delay(400);
+
+      el.resultsSection.classList.remove("hidden");
+      spawnConfetti();
+    } catch (error) {
+      console.error(error);
+      showToast(t("genError"));
+    } finally {
+      state.drawing = false;
+      validate();
+    }
+  }
+
+  /* ---------------- clipboard / toast ---------------- */
+
+  async function copyText(text, successMessage) {
+    if (!text || text === "—") {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(successMessage);
+      return;
+    } catch (_) {
+      const textarea = document.createElement("textarea");
+
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+
+      showToast(successMessage);
+    }
+  }
+
+  let toastTimer = null;
+
+  function showToast(message) {
+    el.toast.textContent = message;
+    el.toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+      el.toast.classList.remove("show");
+    }, 1900);
+  }
+
+  /* ---------------- confetti ---------------- */
+
+  const CONFETTI_COLORS = ["#f0b93a", "#ffe29a", "#ff2b12", "#2fe6b8"];
+
+  function spawnConfetti() {
+    el.confettiLayer.replaceChildren();
+
+    const count = 90;
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement("span");
+      piece.className = "confetti-piece";
+
+      const left = Math.random() * 100;
+      const drift = (Math.random() - 0.5) * 260;
+      const duration = 2.6 + Math.random() * 2.0;
+      const delay = Math.random() * 0.6;
+      const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+      const rounded = Math.random() > 0.5;
+      const size = 8 + Math.round(Math.random() * 6);
+
+      piece.style.left = `${left}%`;
+      piece.style.width = `${size}px`;
+      piece.style.height = `${Math.round(size * 1.6)}px`;
+      piece.style.background = color;
+      piece.style.setProperty("--drift", `${drift}px`);
+      piece.style.animationDuration = `${duration}s`;
+      piece.style.animationDelay = `${delay}s`;
+      if (rounded) piece.style.borderRadius = "50%";
+
+      fragment.appendChild(piece);
+    }
+
+    el.confettiLayer.appendChild(fragment);
+
+    clearTimeout(spawnConfetti._timer);
+    spawnConfetti._timer = setTimeout(() => {
+      el.confettiLayer.replaceChildren();
+    }, 5200);
+  }
+
+  function resetDrawView() {
+    state.winners = [];
+
+    el.drawStage.classList.add("hidden");
+    el.drawStage.classList.remove("hit");
+    el.resultsSection.classList.add("hidden");
+    el.confettiLayer.replaceChildren();
+
+    el.rouletteNumber.textContent = "--------";
+    el.rouletteProgress.textContent = t("progressPreparing");
+
+    validate();
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ---------------- events ---------------- */
+
+  el.idsInput.addEventListener("input", updateIds);
+
+  el.clearIdsBtn.addEventListener("click", () => {
+    el.idsInput.value = "";
+    updateIds();
+    el.idsInput.focus();
+  });
+
+  el.winnerCount.addEventListener("input", validate);
+
+  el.winnerCount.addEventListener("change", () => {
+    setWinnerCount(getWinnerCount());
+  });
+
+  el.minusBtn.addEventListener("click", () => {
+    setWinnerCount(getWinnerCount() - 1);
+  });
+
+  el.plusBtn.addEventListener("click", () => {
+    setWinnerCount(getWinnerCount() + 1);
+  });
+
+  el.startBtn.addEventListener("click", startDraw);
+
+  el.copyHashBtn.addEventListener("click", () => {
+    copyText(state.hash, t("hashCopied"));
+  });
+
+  el.copyResultsBtn.addEventListener("click", () => {
+    copyText(state.winners.join("\n"), t("listCopied"));
+  });
+
+  el.newDrawBtn.addEventListener("click", resetDrawView);
+  el.closeResultsBtn.addEventListener("click", resetDrawView);
+
+  el.resultsSection.addEventListener("click", (event) => {
+    if (event.target === el.resultsSection) {
+      resetDrawView();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !el.resultsSection.classList.contains("hidden")) {
+      resetDrawView();
+    }
+  });
+
+  el.langBtns.forEach(btn => {
+    btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+  });
+
+  /* ---------------- init ---------------- */
+
+  applyStaticTranslations();
+  el.rouletteProgress.textContent = t("progressPreparing");
+  updateIds();
+})();
+
+</script>
+</body>
+</html>

@@ -3,6 +3,142 @@
 
   const MAX_IDS = 1000;
   const DEFAULT_WINNERS = 5;
+  const LANG_KEY = "pinco_lang";
+
+  /* ---------------- I18N ---------------- */
+
+  const I18N = {
+    uz: {
+      pageTitle: "PINCO — Tasodifiy tanlov",
+      metaDescription: "PINCO ishtirokchilari uchun halol tasodifiy tanlov.",
+      localTag: "brauzeringizda, lokal",
+      participantsTitle: "Ishtirokchilar",
+      clearBtn: "Tozalash",
+      hashCopyAria: "Ro'yxat SHA-256 xeshini nusxalash",
+      winnersTitle: "G'oliblar soni",
+      decreaseAria: "Kamaytirish",
+      increaseAria: "Ko'paytirish",
+      excludeInfo: "oldin g'olib chiqqanlar qatnashmaydi — {n} ta",
+      vAddParticipants: "Boshlash uchun ishtirokchilarni qo'shing",
+      vLimit: "Limit — {max} ta noyob ID",
+      vAllWon: "Yangi ro'yxat qo'shilishini kutmoqda",
+      vMinOne: "Kamida 1 ta ID tanlanishi kerak",
+      vAvailable: "Mavjud: {pool} ta ID",
+      vReady: "{pool} ishtirokchi → {winners} g'olib",
+      startBtn: "BOSHLASH",
+      drawBadge: "tanlov ketmoqda",
+      progressPreparing: "Tayyorlanmoqda…",
+      progressFinalizing: "Natija aniqlanmoqda…",
+      progressDone: "Tayyor",
+      doneLabel: "TAYYOR",
+      footerNote: "Tanlov butunlay brauzeringizda amalga oshiriladi. Ishtirokchilar ma'lumotlari hech qayerga yuborilmaydi.",
+      winnersHeading: "G'oliblar",
+      copyResultsBtn: "Ro'yxatni nusxalash",
+      auditParticipants: "ishtirokchi",
+      auditHashLabel: "xesh",
+      newDrawBtn: "Yangi tanlov",
+      closeAria: "Yopish",
+      hashCopied: "SHA-256 nusxalandi",
+      listCopied: "Ro'yxat nusxalandi",
+      genError: "Xatolik: brauzer xavfsiz generatorni qo'llab-quvvatlamaydi",
+      localeCode: "uz-UZ"
+    },
+
+    ru: {
+      pageTitle: "PINCO — Случайный розыгрыш",
+      metaDescription: "Честный случайный розыгрыш среди участников PINCO.",
+      localTag: "локально, в браузере",
+      participantsTitle: "Участники",
+      clearBtn: "Очистить",
+      hashCopyAria: "Скопировать SHA-256 хэш списка",
+      winnersTitle: "Количество победителей",
+      decreaseAria: "Уменьшить",
+      increaseAria: "Увеличить",
+      excludeInfo: "предыдущие победители не участвуют — {n}",
+      vAddParticipants: "Добавьте участников, чтобы начать",
+      vLimit: "Лимит — {max} уникальных ID",
+      vAllWon: "Ожидаем новый список участников",
+      vMinOne: "Нужно выбрать хотя бы 1 ID",
+      vAvailable: "Доступно: {pool} ID",
+      vReady: "{pool} участников → {winners} победителей",
+      startBtn: "СТАРТ",
+      drawBadge: "идёт розыгрыш",
+      progressPreparing: "Подготовка…",
+      progressFinalizing: "Фиксируем результат…",
+      progressDone: "Готово",
+      doneLabel: "ГОТОВО",
+      footerNote: "Розыгрыш полностью выполняется в вашем браузере. Данные участников никуда не отправляются.",
+      winnersHeading: "Победители",
+      copyResultsBtn: "Копировать список",
+      auditParticipants: "участников",
+      auditHashLabel: "хэш",
+      newDrawBtn: "Новый розыгрыш",
+      closeAria: "Закрыть",
+      hashCopied: "SHA-256 скопирован",
+      listCopied: "Список скопирован",
+      genError: "Ошибка: браузер не поддерживает безопасный генератор",
+      localeCode: "ru-RU"
+    },
+
+    en: {
+      pageTitle: "PINCO — Random Draw",
+      metaDescription: "A fair random draw for PINCO participants.",
+      localTag: "local, in your browser",
+      participantsTitle: "Participants",
+      clearBtn: "Clear",
+      hashCopyAria: "Copy the list's SHA-256 hash",
+      winnersTitle: "Number of winners",
+      decreaseAria: "Decrease",
+      increaseAria: "Increase",
+      excludeInfo: "previous winners are excluded — {n}",
+      vAddParticipants: "Add participants to get started",
+      vLimit: "Limit — {max} unique IDs",
+      vAllWon: "Waiting for a new participant list",
+      vMinOne: "Select at least 1 ID",
+      vAvailable: "Available: {pool} IDs",
+      vReady: "{pool} participants → {winners} winners",
+      startBtn: "START",
+      drawBadge: "draw in progress",
+      progressPreparing: "Preparing…",
+      progressFinalizing: "Finalizing the result…",
+      progressDone: "Done",
+      doneLabel: "DONE",
+      footerNote: "The draw runs entirely in your browser. Participant data is never sent anywhere.",
+      winnersHeading: "Winners",
+      copyResultsBtn: "Copy list",
+      auditParticipants: "participants",
+      auditHashLabel: "hash",
+      newDrawBtn: "New draw",
+      closeAria: "Close",
+      hashCopied: "SHA-256 copied",
+      listCopied: "List copied",
+      genError: "Error: your browser doesn't support a secure generator",
+      localeCode: "en-GB"
+    }
+  };
+
+  function readStoredLang() {
+    try {
+      const stored = localStorage.getItem(LANG_KEY);
+      if (stored && I18N[stored]) return stored;
+    } catch (_) { /* ignore */ }
+    return "uz";
+  }
+
+  let lang = readStoredLang();
+
+  function t(key, vars) {
+    const dict = I18N[lang] || I18N.uz;
+    let str = dict[key] ?? I18N.uz[key] ?? key;
+
+    if (vars) {
+      str = str.replace(/\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? vars[k] : `{${k}}`));
+    }
+
+    return str;
+  }
+
+  /* ---------------- DOM ---------------- */
 
   const el = {
     idsInput: document.getElementById("idsInput"),
@@ -17,7 +153,7 @@
     plusBtn: document.getElementById("plusBtn"),
 
     excludeInfo: document.getElementById("excludeInfo"),
-    excludedCount: document.getElementById("excludedCount"),
+    excludeInfoText: document.getElementById("excludeInfoText"),
 
     validation: document.getElementById("validationMessage"),
     startBtn: document.getElementById("startBtn"),
@@ -38,6 +174,8 @@
 
     confettiLayer: document.getElementById("confettiLayer"),
 
+    langBtns: document.querySelectorAll(".lang-btn"),
+
     toast: document.getElementById("toast")
   };
 
@@ -53,6 +191,49 @@
     hashRevision: 0,
     excludedIds: new Set()
   };
+
+  /* ---------------- language application ---------------- */
+
+  function applyStaticTranslations() {
+    document.documentElement.lang = lang;
+    document.title = t("pageTitle");
+
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", t("metaDescription"));
+
+    document.querySelectorAll("[data-i18n]").forEach(node => {
+      node.textContent = t(node.getAttribute("data-i18n"));
+    });
+
+    document.querySelectorAll("[data-i18n-aria]").forEach(node => {
+      node.setAttribute("aria-label", t(node.getAttribute("data-i18n-aria")));
+    });
+
+    el.langBtns.forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.lang === lang);
+    });
+  }
+
+  function setLanguage(nextLang) {
+    if (!I18N[nextLang] || nextLang === lang) return;
+
+    lang = nextLang;
+
+    try { localStorage.setItem(LANG_KEY, lang); } catch (_) { /* ignore */ }
+
+    applyStaticTranslations();
+    updateExcludeInfo();
+
+    if (!el.drawStage.classList.contains("hidden") && !state.drawing) {
+      el.rouletteProgress.textContent = t("progressDone");
+    } else if (el.drawStage.classList.contains("hidden")) {
+      el.rouletteProgress.textContent = t("progressPreparing");
+    }
+
+    validate();
+  }
+
+  /* ---------------- parsing / hashing ---------------- */
 
   function parseIds(text) {
     const tokens = text
@@ -123,7 +304,7 @@
   function updateExcludeInfo() {
     const active = state.excludedIds.size > 0;
     el.excludeInfo.classList.toggle("hidden", !active);
-    el.excludedCount.textContent = String(state.excludedIds.size);
+    el.excludeInfoText.textContent = t("excludeInfo", { n: state.excludedIds.size });
   }
 
   function validate() {
@@ -134,21 +315,21 @@
     let className = "validation";
 
     if (state.ids.length === 0) {
-      message = "Boshlash uchun ishtirokchilarni qo'shing";
+      message = t("vAddParticipants");
     } else if (state.overLimit) {
-      message = `Limit — ${MAX_IDS} ta noyob ID`;
+      message = t("vLimit", { max: MAX_IDS });
       className += " error";
     } else if (pool.length === 0) {
       // Everyone already won — stay quiet, no scary error, just wait for a new list.
-      message = "Yangi ro'yxat qo'shilishini kutmoqda";
+      message = t("vAllWon");
     } else if (winners < 1) {
-      message = "Kamida 1 ta ID tanlanishi kerak";
+      message = t("vMinOne");
       className += " error";
     } else if (winners > pool.length) {
-      message = `Mavjud: ${pool.length} ta ID`;
+      message = t("vAvailable", { pool: pool.length });
       className += " error";
     } else {
-      message = `${pool.length} ishtirokchi → ${winners} g'olib`;
+      message = t("vReady", { pool: pool.length, winners });
       className += " ok";
     }
 
@@ -196,6 +377,8 @@
     validate();
   }
 
+  /* ---------------- randomness ---------------- */
+
   function secureRandomIndex(maxExclusive) {
     if (!Number.isInteger(maxExclusive) || maxExclusive <= 0) {
       throw new Error("Invalid random range");
@@ -235,7 +418,7 @@
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function animateRoulette(ids, winnerCount) {
+  async function animateRoulette(ids) {
     const duration = 2400;
     const startTime = performance.now();
 
@@ -258,7 +441,7 @@
       await delay(wait);
     }
 
-    el.rouletteProgress.textContent = "Natija aniqlanmoqda…";
+    el.rouletteProgress.textContent = t("progressFinalizing");
 
     await delay(320);
   }
@@ -307,7 +490,7 @@
     el.drawStage.scrollIntoView({ behavior: "smooth", block: "center" });
 
     try {
-      await animateRoulette(drawIds, winnerCount);
+      await animateRoulette(drawIds);
 
       const winners = pickWithoutReplacement(drawIds, winnerCount);
       state.winners = winners;
@@ -320,16 +503,16 @@
       if (winners.length === 1) {
         el.rouletteNumber.textContent = winners[0];
       } else {
-        el.rouletteNumber.textContent = "TAYYOR";
+        el.rouletteNumber.textContent = t("doneLabel");
       }
 
-      el.rouletteProgress.textContent = "Tayyor";
+      el.rouletteProgress.textContent = t("progressDone");
 
       renderResults(winners);
 
       const finishedAt = new Date();
 
-      el.drawTime.textContent = finishedAt.toLocaleString("uz-UZ");
+      el.drawTime.textContent = finishedAt.toLocaleString(t("localeCode"));
       el.drawParticipants.textContent = String(drawIds.length);
       el.drawHash.textContent = shortHash(drawHash);
 
@@ -339,12 +522,14 @@
       spawnConfetti();
     } catch (error) {
       console.error(error);
-      showToast("Xatolik: brauzer xavfsiz generatorni qo'llab-quvvatlamaydi");
+      showToast(t("genError"));
     } finally {
       state.drawing = false;
       validate();
     }
   }
+
+  /* ---------------- clipboard / toast ---------------- */
 
   async function copyText(text, successMessage) {
     if (!text || text === "—") {
@@ -384,6 +569,8 @@
       el.toast.classList.remove("show");
     }, 1900);
   }
+
+  /* ---------------- confetti ---------------- */
 
   const CONFETTI_COLORS = ["#f0b93a", "#ffe29a", "#ff2b12", "#2fe6b8"];
 
@@ -434,12 +621,14 @@
     el.confettiLayer.replaceChildren();
 
     el.rouletteNumber.textContent = "--------";
-    el.rouletteProgress.textContent = "Tayyorlanmoqda…";
+    el.rouletteProgress.textContent = t("progressPreparing");
 
     validate();
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+
+  /* ---------------- events ---------------- */
 
   el.idsInput.addEventListener("input", updateIds);
 
@@ -466,11 +655,11 @@
   el.startBtn.addEventListener("click", startDraw);
 
   el.copyHashBtn.addEventListener("click", () => {
-    copyText(state.hash, "SHA-256 nusxalandi");
+    copyText(state.hash, t("hashCopied"));
   });
 
   el.copyResultsBtn.addEventListener("click", () => {
-    copyText(state.winners.join("\n"), "Ro'yxat nusxalandi");
+    copyText(state.winners.join("\n"), t("listCopied"));
   });
 
   el.newDrawBtn.addEventListener("click", resetDrawView);
@@ -488,5 +677,13 @@
     }
   });
 
+  el.langBtns.forEach(btn => {
+    btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+  });
+
+  /* ---------------- init ---------------- */
+
+  applyStaticTranslations();
+  el.rouletteProgress.textContent = t("progressPreparing");
   updateIds();
 })();

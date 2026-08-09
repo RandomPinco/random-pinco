@@ -1,18 +1,16 @@
-# PINCO — Tasodifiy tanlov
+# PINCO — Random Draw
 
-Ishtirokchilar ID raqamlari orasida halol tanlov o'tkazish uchun statik sayt. Hammasi brauzerda ishlaydi — server yo'q, ma'lumot hech qayerga yuborilmaydi.
+Statik sayt: ishtirokchilar ID raqamlari orasida halol tasodifiy tanlov. Server yo'q, ma'lumot hech qayerga yuborilmaydi. / Static site for a fair random draw among participant IDs. No server, no data leaves the browser. / Статический сайт для честного случайного розыгрыша ID участников. Без сервера, без отправки данных.
 
-## Imkoniyatlar
+## Imkoniyatlar / Features / Возможности
 
-- 1000 tagacha noyob ID (matn sifatida, boshidagi nollar saqlanadi)
-- G'oliblar sonini tanlash (+ / − tugmalari)
-- `crypto.getRandomValues()` orqali xavfsiz tasodifiy tanlov (siljishsiz — rejection sampling)
-- Takrorlanishsiz tanlov
-- **Avtomatik istisno**: bir marta g'olib chiqqan ID keyingi tanlovlarda ishtirok etmaydi — bitta odam ikki marta yutolmaydi. Bu faqat yangi ID ro'yxati kiritilganda tozalanadi
-- Barcha ishtirokchilar allaqachon g'olib chiqqan bo'lsa, tugma shunchaki o'chiriladi — xato ko'rsatilmaydi
-- Ishtirokchilar ro'yxatining SHA-256 xeshi — natijalar keyin almashtirilmaganini tasdiqlaydi
-- Natijalarni va xeshni buferga nusxalash
-- G'oliblar butun ekran markazida, konfetti animatsiyasi bilan ko'rsatiladi
+- UZ / RU / ENG interfeys — pastki panelda tanlangan til `localStorage`'da saqlanadi
+- 1000 tagacha noyob ID
+- G'oliblar sonini tanlash
+- `crypto.getRandomValues()` orqali xavfsiz tasodifiy tanlov (rejection sampling — siljishsiz)
+- Takrorlanishsiz tanlov + **avtomatik istisno**: bir marta g'olib chiqqan ID keyingi tanlovlarda ishtirok etmaydi, faqat yangi ro'yxat kiritilganda tozalanadi
+- SHA-256 xesh — ro'yxat almashtirilmaganini tasdiqlaydi
+- G'oliblar ekran markazida, konfetti animatsiyasi bilan
 
 ## Fayllar
 
@@ -23,8 +21,7 @@ Ishtirokchilar ID raqamlari orasida halol tanlov o'tkazish uchun statik sayt. Ha
 
 ## GitHub Pages'da yangilash
 
-1. GitHub'dagi repozitoriyani oching.
-2. `Add file → Upload files`.
-3. Barcha 4 faylni tortib tashlang — GitHub mavjudlarini almashtirishni taklif qiladi.
-4. `Commit changes` → Pages saytni qayta qurishini kuting (odatda 1–2 daqiqa).
-5. **Muhim:** brauzer eski versiyani keshdan ko'rsatishi mumkin. Sahifani albatta qattiq yangilang: `Ctrl/Cmd + Shift + R`, yoki yangi/anonim oynada oching, so'ng tekshiring.
+1. Repozitoriyani oching → `Add file → Upload files`.
+2. Barcha 4 faylni tortib tashlang (mavjudlarini almashtiradi).
+3. `Commit changes` → 1–2 daqiqa kuting.
+4. **Muhim:** eski versiya keshda qolishi mumkin — sahifani qattiq yangilang: `Ctrl/Cmd + Shift + R`, yoki yangi anonim oynada tekshiring.

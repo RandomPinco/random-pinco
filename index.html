@@ -8,7 +8,7 @@
   <meta name="description" content="PINCO ishtirokchilari uchun halol tasodifiy tanlov.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 
@@ -23,14 +23,22 @@
   <main class="shell">
     <header class="top">
       <img src="./pinco-logo.png" alt="PINCO" class="logo">
-      <div class="local-tag"><i></i>brauzeringizda, lokal</div>
+
+      <div class="top-right">
+        <div class="lang-switch" role="group" aria-label="Til / Язык / Language">
+          <button type="button" class="lang-btn" data-lang="uz">UZ</button>
+          <button type="button" class="lang-btn" data-lang="ru">RU</button>
+          <button type="button" class="lang-btn" data-lang="en">ENG</button>
+        </div>
+        <div class="local-tag"><i></i><span data-i18n="localTag">brauzeringizda, lokal</span></div>
+      </div>
     </header>
 
     <section class="grid">
       <!-- PARTICIPANTS -->
       <section class="panel panel-ids">
         <div class="panel-head">
-          <h1>Ishtirokchilar</h1>
+          <h1 data-i18n="participantsTitle">Ishtirokchilar</h1>
           <div class="count"><strong id="idCount">0</strong><span>/ 1000</span></div>
         </div>
 
@@ -42,8 +50,8 @@
         ></textarea>
 
         <div class="ids-foot">
-          <button id="clearIdsBtn" type="button" class="text-btn">Tozalash</button>
-          <button id="copyHashBtn" type="button" class="hash-chip" aria-label="Ro'yxat SHA-256 xeshini nusxalash">
+          <button id="clearIdsBtn" type="button" class="text-btn" data-i18n="clearBtn">Tozalash</button>
+          <button id="copyHashBtn" type="button" class="hash-chip" data-i18n-aria="hashCopyAria" aria-label="Ro'yxat SHA-256 xeshini nusxalash">
             <span>SHA-256</span>
             <code id="listHash">—</code>
           </button>
@@ -53,41 +61,39 @@
       <!-- SETTINGS / START -->
       <section class="panel panel-run">
         <div class="panel-head">
-          <h2>G'oliblar soni</h2>
+          <h2 data-i18n="winnersTitle">G'oliblar soni</h2>
         </div>
 
         <div class="stepper">
-          <button type="button" id="minusBtn" aria-label="Kamaytirish">−</button>
+          <button type="button" id="minusBtn" data-i18n-aria="decreaseAria" aria-label="Kamaytirish">−</button>
           <input id="winnerCount" type="number" min="1" max="1000" value="5" inputmode="numeric">
-          <button type="button" id="plusBtn" aria-label="Ko'paytirish">+</button>
+          <button type="button" id="plusBtn" data-i18n-aria="increaseAria" aria-label="Ko'paytirish">+</button>
         </div>
 
         <div id="excludeInfo" class="exclude-info hidden">
           <i></i>
-          <span>oldin g'olib chiqqanlar qatnashmaydi — <strong id="excludedCount">0</strong> ta</span>
+          <span id="excludeInfoText"></span>
         </div>
 
-        <div id="validationMessage" class="validation" aria-live="polite">
-          Boshlash uchun ishtirokchilarni qo'shing
-        </div>
+        <div id="validationMessage" class="validation" aria-live="polite"></div>
 
         <button id="startBtn" type="button" class="start" disabled>
           <span class="start-ring"></span>
-          <span class="start-label">BOSHLASH</span>
+          <span class="start-label" data-i18n="startBtn">BOSHLASH</span>
         </button>
       </section>
     </section>
 
     <!-- DRAW -->
     <section id="drawStage" class="stage hidden">
-      <span class="stage-badge"><i></i>tanlov ketmoqda</span>
+      <span class="stage-badge"><i></i><span data-i18n="drawBadge">tanlov ketmoqda</span></span>
       <div class="roulette">
         <strong id="rouletteNumber">--------</strong>
-        <span id="rouletteProgress">Tayyorlanmoqda…</span>
+        <span id="rouletteProgress"></span>
       </div>
     </section>
 
-    <footer class="foot">
+    <footer class="foot" data-i18n="footerNote">
       Tanlov butunlay brauzeringizda amalga oshiriladi. Ishtirokchilar ma'lumotlari hech qayerga yuborilmaydi.
     </footer>
   </main>
@@ -97,11 +103,11 @@
     <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
 
     <div class="results-panel">
-      <button id="closeResultsBtn" type="button" class="results-close" aria-label="Yopish">×</button>
+      <button id="closeResultsBtn" type="button" class="results-close" data-i18n-aria="closeAria" aria-label="Yopish">×</button>
 
       <div class="results-head">
-        <h2>G'oliblar</h2>
-        <button id="copyResultsBtn" type="button" class="text-btn text-btn-fill">Ro'yxatni nusxalash</button>
+        <h2 data-i18n="winnersHeading">G'oliblar</h2>
+        <button id="copyResultsBtn" type="button" class="text-btn text-btn-fill" data-i18n="copyResultsBtn">Ro'yxatni nusxalash</button>
       </div>
 
       <div id="resultsGrid" class="results-grid"></div>
@@ -109,12 +115,12 @@
       <div class="audit">
         <span id="drawTime">—</span>
         <span class="dot">·</span>
-        <span id="drawParticipants">—</span> ishtirokchi
+        <span id="drawParticipants">—</span> <span data-i18n="auditParticipants">ishtirokchi</span>
         <span class="dot">·</span>
-        xesh <code id="drawHash">—</code>
+        <span data-i18n="auditHashLabel">xesh</span> <code id="drawHash">—</code>
       </div>
 
-      <button id="newDrawBtn" type="button" class="text-btn">Yangi tanlov</button>
+      <button id="newDrawBtn" type="button" class="text-btn" data-i18n="newDrawBtn">Yangi tanlov</button>
     </div>
   </section>
 
