@@ -143,6 +143,7 @@
   const el = {
     idsInput: document.getElementById("idsInput"),
     idCount: document.getElementById("idCount"),
+    idLimit: document.getElementById("idLimit"),
 
     listHash: document.getElementById("listHash"),
     copyHashBtn: document.getElementById("copyHashBtn"),
@@ -280,6 +281,10 @@
     return `${hash.slice(0, 8)}…${hash.slice(-8)}`;
   }
 
+  function formatNumber(n) {
+    return n.toLocaleString("en-US").replace(/,/g, " ");
+  }
+
   function getWinnerCount() {
     const value = Number.parseInt(el.winnerCount.value, 10);
     return Number.isFinite(value) ? value : DEFAULT_WINNERS;
@@ -304,7 +309,7 @@
   function updateExcludeInfo() {
     const active = state.excludedIds.size > 0;
     el.excludeInfo.classList.toggle("hidden", !active);
-    el.excludeInfoText.textContent = t("excludeInfo", { n: state.excludedIds.size });
+    el.excludeInfoText.textContent = t("excludeInfo", { n: formatNumber(state.excludedIds.size) });
   }
 
   function validate() {
@@ -317,7 +322,7 @@
     if (state.ids.length === 0) {
       message = t("vAddParticipants");
     } else if (state.overLimit) {
-      message = t("vLimit", { max: MAX_IDS });
+      message = t("vLimit", { max: formatNumber(MAX_IDS) });
       className += " error";
     } else if (pool.length === 0) {
       // Everyone already won — stay quiet, no scary error, just wait for a new list.
@@ -326,10 +331,10 @@
       message = t("vMinOne");
       className += " error";
     } else if (winners > pool.length) {
-      message = t("vAvailable", { pool: pool.length });
+      message = t("vAvailable", { pool: formatNumber(pool.length) });
       className += " error";
     } else {
-      message = t("vReady", { pool: pool.length, winners });
+      message = t("vReady", { pool: formatNumber(pool.length), winners: formatNumber(winners) });
       className += " ok";
     }
 
@@ -354,7 +359,7 @@
     state.overLimit = parsed.overLimit;
     state.excludedIds = new Set(); // new list -> nobody has won yet
 
-    el.idCount.textContent = String(state.ids.length);
+    el.idCount.textContent = formatNumber(state.ids.length);
 
     if (!state.ids.length) {
       state.hash = "—";
@@ -513,7 +518,7 @@
       const finishedAt = new Date();
 
       el.drawTime.textContent = finishedAt.toLocaleString(t("localeCode"));
-      el.drawParticipants.textContent = String(drawIds.length);
+      el.drawParticipants.textContent = formatNumber(drawIds.length);
       el.drawHash.textContent = shortHash(drawHash);
 
       await delay(400);
@@ -682,6 +687,9 @@
   });
 
   /* ---------------- init ---------------- */
+
+  el.idLimit.textContent = MAX_IDS.toLocaleString("en-US").replace(/,/g, " ");
+  el.winnerCount.max = String(MAX_IDS);
 
   applyStaticTranslations();
   el.rouletteProgress.textContent = t("progressPreparing");

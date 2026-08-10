@@ -812,7 +812,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
       <section class="panel panel-ids">
         <div class="panel-head">
           <h1 data-i18n="participantsTitle">Ishtirokchilar</h1>
-          <div class="count"><strong id="idCount">0</strong><span>/ 1000</span></div>
+          <div class="count"><strong id="idCount">0</strong><span>/ <span id="idLimit">1000</span></span></div>
         </div>
 
         <textarea
@@ -839,7 +839,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
 
         <div class="stepper">
           <button type="button" id="minusBtn" data-i18n-aria="decreaseAria" aria-label="Kamaytirish">−</button>
-          <input id="winnerCount" type="number" min="1" max="1000" value="5" inputmode="numeric">
+          <input id="winnerCount" type="number" min="1" max="50000" value="5" inputmode="numeric">
           <button type="button" id="plusBtn" data-i18n-aria="increaseAria" aria-label="Ko'paytirish">+</button>
         </div>
 
@@ -903,7 +903,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
 (() => {
   "use strict";
 
-  const MAX_IDS = 1000;
+  const MAX_IDS = 50000;
   const DEFAULT_WINNERS = 5;
   const LANG_KEY = "pinco_lang";
 
@@ -1045,6 +1045,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
   const el = {
     idsInput: document.getElementById("idsInput"),
     idCount: document.getElementById("idCount"),
+    idLimit: document.getElementById("idLimit"),
 
     listHash: document.getElementById("listHash"),
     copyHashBtn: document.getElementById("copyHashBtn"),
@@ -1182,6 +1183,10 @@ button:disabled { cursor: not-allowed; opacity: .4; }
     return `${hash.slice(0, 8)}…${hash.slice(-8)}`;
   }
 
+  function formatNumber(n) {
+    return n.toLocaleString("en-US").replace(/,/g, " ");
+  }
+
   function getWinnerCount() {
     const value = Number.parseInt(el.winnerCount.value, 10);
     return Number.isFinite(value) ? value : DEFAULT_WINNERS;
@@ -1206,7 +1211,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
   function updateExcludeInfo() {
     const active = state.excludedIds.size > 0;
     el.excludeInfo.classList.toggle("hidden", !active);
-    el.excludeInfoText.textContent = t("excludeInfo", { n: state.excludedIds.size });
+    el.excludeInfoText.textContent = t("excludeInfo", { n: formatNumber(state.excludedIds.size) });
   }
 
   function validate() {
@@ -1219,7 +1224,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
     if (state.ids.length === 0) {
       message = t("vAddParticipants");
     } else if (state.overLimit) {
-      message = t("vLimit", { max: MAX_IDS });
+      message = t("vLimit", { max: formatNumber(MAX_IDS) });
       className += " error";
     } else if (pool.length === 0) {
       // Everyone already won — stay quiet, no scary error, just wait for a new list.
@@ -1228,10 +1233,10 @@ button:disabled { cursor: not-allowed; opacity: .4; }
       message = t("vMinOne");
       className += " error";
     } else if (winners > pool.length) {
-      message = t("vAvailable", { pool: pool.length });
+      message = t("vAvailable", { pool: formatNumber(pool.length) });
       className += " error";
     } else {
-      message = t("vReady", { pool: pool.length, winners });
+      message = t("vReady", { pool: formatNumber(pool.length), winners: formatNumber(winners) });
       className += " ok";
     }
 
@@ -1256,7 +1261,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
     state.overLimit = parsed.overLimit;
     state.excludedIds = new Set(); // new list -> nobody has won yet
 
-    el.idCount.textContent = String(state.ids.length);
+    el.idCount.textContent = formatNumber(state.ids.length);
 
     if (!state.ids.length) {
       state.hash = "—";
@@ -1415,7 +1420,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
       const finishedAt = new Date();
 
       el.drawTime.textContent = finishedAt.toLocaleString(t("localeCode"));
-      el.drawParticipants.textContent = String(drawIds.length);
+      el.drawParticipants.textContent = formatNumber(drawIds.length);
       el.drawHash.textContent = shortHash(drawHash);
 
       await delay(400);
@@ -1584,6 +1589,9 @@ button:disabled { cursor: not-allowed; opacity: .4; }
   });
 
   /* ---------------- init ---------------- */
+
+  el.idLimit.textContent = MAX_IDS.toLocaleString("en-US").replace(/,/g, " ");
+  el.winnerCount.max = String(MAX_IDS);
 
   applyStaticTranslations();
   el.rouletteProgress.textContent = t("progressPreparing");

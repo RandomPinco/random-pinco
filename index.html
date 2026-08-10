@@ -39,7 +39,7 @@
       <section class="panel panel-ids">
         <div class="panel-head">
           <h1 data-i18n="participantsTitle">Ishtirokchilar</h1>
-          <div class="count"><strong id="idCount">0</strong><span>/ 1000</span></div>
+          <div class="count"><strong id="idCount">0</strong><span>/ <span id="idLimit">1000</span></span></div>
         </div>
 
         <textarea
@@ -66,7 +66,7 @@
 
         <div class="stepper">
           <button type="button" id="minusBtn" data-i18n-aria="decreaseAria" aria-label="Kamaytirish">−</button>
-          <input id="winnerCount" type="number" min="1" max="1000" value="5" inputmode="numeric">
+          <input id="winnerCount" type="number" min="1" max="50000" value="5" inputmode="numeric">
           <button type="button" id="plusBtn" data-i18n-aria="increaseAria" aria-label="Ko'paytirish">+</button>
         </div>
 

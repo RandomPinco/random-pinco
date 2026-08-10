@@ -5,7 +5,7 @@ Statik sayt: ishtirokchilar ID raqamlari orasida halol tasodifiy tanlov. Server 
 ## Imkoniyatlar / Features / Возможности
 
 - UZ / RU / ENG interfeys — pastki panelda tanlangan til `localStorage`'da saqlanadi
-- 1000 tagacha noyob ID
+- 50 000 tagacha noyob ID
 - G'oliblar sonini tanlash
 - `crypto.getRandomValues()` orqali xavfsiz tasodifiy tanlov (rejection sampling — siljishsiz)
 - Takrorlanishsiz tanlov + **avtomatik istisno**: bir marta g'olib chiqqan ID keyingi tanlovlarda ishtirok etmaydi, faqat yangi ro'yxat kiritilganda tozalanadi
