@@ -38,6 +38,8 @@
       auditHashLabel: "xesh",
       newDrawBtn: "Yangi tanlov",
       closeAria: "Yopish",
+      fullscreenEnterAria: "To'liq ekran",
+      fullscreenExitAria: "To'liq ekrandan chiqish",
       hashCopied: "SHA-256 nusxalandi",
       listCopied: "Ro'yxat nusxalandi",
       genError: "Xatolik: brauzer xavfsiz generatorni qo'llab-quvvatlamaydi",
@@ -74,6 +76,8 @@
       auditHashLabel: "хэш",
       newDrawBtn: "Новый розыгрыш",
       closeAria: "Закрыть",
+      fullscreenEnterAria: "На весь экран",
+      fullscreenExitAria: "Выйти из полноэкранного режима",
       hashCopied: "SHA-256 скопирован",
       listCopied: "Список скопирован",
       genError: "Ошибка: браузер не поддерживает безопасный генератор",
@@ -110,6 +114,8 @@
       auditHashLabel: "hash",
       newDrawBtn: "New draw",
       closeAria: "Close",
+      fullscreenEnterAria: "Enter full screen",
+      fullscreenExitAria: "Exit full screen",
       hashCopied: "SHA-256 copied",
       listCopied: "List copied",
       genError: "Error: your browser doesn't support a secure generator",
@@ -176,6 +182,10 @@
 
     langBtns: document.querySelectorAll(".lang-btn"),
 
+    fullscreenBtn: document.getElementById("fullscreenBtn"),
+    iconExpand: document.querySelector("#fullscreenBtn .icon-expand"),
+    iconCollapse: document.querySelector("#fullscreenBtn .icon-collapse"),
+
     toast: document.getElementById("toast")
   };
 
@@ -223,6 +233,7 @@
 
     applyStaticTranslations();
     updateExcludeInfo();
+    updateFullscreenUI();
 
     if (!el.drawStage.classList.contains("hidden") && !state.drawing) {
       el.rouletteProgress.textContent = t("progressDone");
@@ -231,6 +242,35 @@
     }
 
     validate();
+  }
+
+  /* ---------------- fullscreen ---------------- */
+
+  const fullscreenSupported = !!(
+    document.documentElement.requestFullscreen || document.exitFullscreen !== undefined
+  );
+
+  function updateFullscreenUI() {
+    const active = !!document.fullscreenElement;
+
+    el.iconExpand.classList.toggle("hidden", active);
+    el.iconCollapse.classList.toggle("hidden", !active);
+    el.fullscreenBtn.setAttribute(
+      "aria-label",
+      active ? t("fullscreenExitAria") : t("fullscreenEnterAria")
+    );
+  }
+
+  async function toggleFullscreen() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   /* ---------------- parsing / hashing ---------------- */
@@ -685,11 +725,19 @@
     btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
   });
 
+  if (fullscreenSupported) {
+    el.fullscreenBtn.addEventListener("click", toggleFullscreen);
+    document.addEventListener("fullscreenchange", updateFullscreenUI);
+  } else {
+    el.fullscreenBtn.classList.add("hidden");
+  }
+
   /* ---------------- init ---------------- */
 
   el.winnerCount.max = String(MAX_IDS);
 
   applyStaticTranslations();
+  updateFullscreenUI();
   el.rouletteProgress.textContent = t("progressPreparing");
   updateIds();
 })();

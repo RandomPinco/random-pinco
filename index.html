@@ -25,10 +25,21 @@
       <img src="./pinco-logo.png" alt="PINCO" class="logo">
 
       <div class="top-right">
-        <div class="lang-switch" role="group" aria-label="Til / Язык / Language">
-          <button type="button" class="lang-btn" data-lang="uz">UZ</button>
-          <button type="button" class="lang-btn" data-lang="ru">RU</button>
-          <button type="button" class="lang-btn" data-lang="en">ENG</button>
+        <div class="top-controls">
+          <button id="fullscreenBtn" type="button" class="icon-btn" data-i18n-aria="fullscreenEnterAria" aria-label="To'liq ekran">
+            <svg class="icon-expand" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <svg class="icon-collapse hidden" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M4 9h5V4M20 9h-5V4M4 15h5v5M20 15h-5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <div class="lang-switch" role="group" aria-label="Til / Язык / Language">
+            <button type="button" class="lang-btn" data-lang="uz">UZ</button>
+            <button type="button" class="lang-btn" data-lang="ru">RU</button>
+            <button type="button" class="lang-btn" data-lang="en">ENG</button>
+          </div>
         </div>
         <div class="local-tag"><i></i><span data-i18n="localTag">brauzeringizda, lokal</span></div>
       </div>

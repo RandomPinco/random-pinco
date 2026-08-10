@@ -161,6 +161,32 @@ button:disabled { cursor: not-allowed; opacity: .4; }
   gap: 10px;
 }
 
+.top-controls {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--gold-line);
+  border-radius: 999px;
+  background: rgba(30, 0, 4, .45);
+  color: var(--muted);
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.icon-btn:hover {
+  color: var(--gold-soft);
+  border-color: var(--gold);
+}
+
+.icon-btn svg { width: 17px; height: 17px; }
+
 .lang-switch {
   display: inline-flex;
   align-items: stretch;
@@ -758,7 +784,9 @@ button:disabled { cursor: not-allowed; opacity: .4; }
   .shell { width: min(100% - 20px, 1180px); padding-top: 20px; }
   .top { flex-wrap: wrap; gap: 14px; }
   .logo { width: 130px; }
-  .top-right { align-items: flex-start; width: 100%; flex-direction: row; justify-content: space-between; }
+  .top-right { align-items: flex-end; width: auto; }
+  .icon-btn { width: 34px; height: 34px; }
+  .icon-btn svg { width: 15px; height: 15px; }
   .lang-btn { padding: 7px 11px; font-size: 10px; }
   .local-tag { font-size: 9px; padding: 7px 11px; }
   .panel, .stage, .results { padding: 18px; border-radius: 16px; }
