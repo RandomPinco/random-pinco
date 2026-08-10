@@ -812,7 +812,7 @@ button:disabled { cursor: not-allowed; opacity: .4; }
       <section class="panel panel-ids">
         <div class="panel-head">
           <h1 data-i18n="participantsTitle">Ishtirokchilar</h1>
-          <div class="count"><strong id="idCount">0</strong><span>/ <span id="idLimit">1000</span></span></div>
+          <div class="count"><strong id="idCount">0</strong></div>
         </div>
 
         <textarea
@@ -1045,7 +1045,6 @@ button:disabled { cursor: not-allowed; opacity: .4; }
   const el = {
     idsInput: document.getElementById("idsInput"),
     idCount: document.getElementById("idCount"),
-    idLimit: document.getElementById("idLimit"),
 
     listHash: document.getElementById("listHash"),
     copyHashBtn: document.getElementById("copyHashBtn"),
@@ -1590,7 +1589,6 @@ button:disabled { cursor: not-allowed; opacity: .4; }
 
   /* ---------------- init ---------------- */
 
-  el.idLimit.textContent = MAX_IDS.toLocaleString("en-US").replace(/,/g, " ");
   el.winnerCount.max = String(MAX_IDS);
 
   applyStaticTranslations();

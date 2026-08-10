@@ -143,7 +143,6 @@
   const el = {
     idsInput: document.getElementById("idsInput"),
     idCount: document.getElementById("idCount"),
-    idLimit: document.getElementById("idLimit"),
 
     listHash: document.getElementById("listHash"),
     copyHashBtn: document.getElementById("copyHashBtn"),
@@ -688,7 +687,6 @@
 
   /* ---------------- init ---------------- */
 
-  el.idLimit.textContent = MAX_IDS.toLocaleString("en-US").replace(/,/g, " ");
   el.winnerCount.max = String(MAX_IDS);
 
   applyStaticTranslations();
