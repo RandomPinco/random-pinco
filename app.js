@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const MAX_IDS = 1000;
+  const MAX_IDS = 50000;
   const DEFAULT_WINNERS = 5;
   const LANG_KEY = "pinco_lang";
 
